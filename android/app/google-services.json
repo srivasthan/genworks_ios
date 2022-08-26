@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "174280112352",
+    "project_id": "fieldpro-genworks-healthcare",
+    "storage_bucket": "fieldpro-genworks-healthcare.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174280112352:android:2e1689bdb87e54e0e73885",
+        "android_client_info": {
+          "package_name": "com.gwhealthcare.fieldprotechnician"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "174280112352-nsosg37mq3r2rsra5e9e7g4v8bff8qr8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gwhealthcare.fieldprotechnician",
+            "certificate_hash": "806d310045d3a3cf61e9dd792b23f04f7a9356a0"
+          }
+        },
+        {
+          "client_id": "174280112352-3kk5kvbs83v6kb6e46l959vn7bbqeuag.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeHjP-b4DFGYXlkOjFSznS28KuFlfdXu8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "174280112352-3kk5kvbs83v6kb6e46l959vn7bbqeuag.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
