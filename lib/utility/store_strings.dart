@@ -64,6 +64,8 @@ class MyConstants {
   static const String remarks = "Remarks";
   static const String todayActivity = "Today Activity";
   static const String points = "Points";
+  static const String myScore = "My Score";
+  static const String topScore = "Topper Score";
   static const String nextLevel = "Next Level";
   static const String timeToBegin = "Time to begin";
   static const String description = "Description";
