@@ -869,9 +869,6 @@ class _EscalateState extends State<Escalate> {
     if (_suggestionLevel == null) {
       setToastMessage(context, MyConstants.suggestTechnicianLevelError);
       validate = false;
-    } else if (_suggestedTechnicianModel == null) {
-      setToastMessage(context, MyConstants.noTechnician);
-      validate = false;
     } else if (_descriptionController.text.trim().isEmpty) {
       setToastMessage(context, MyConstants.descriptionError);
       validate = false;

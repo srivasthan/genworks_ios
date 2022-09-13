@@ -1507,7 +1507,7 @@ class _ReimbursementState extends State<Reimbursement> {
           };
 
           final Response<String> result = await Dio().request(
-              'https://genworks.kaspontech.com/djadmin/reimbursement_web_view/',
+              'https://genworks.kaspontech.com/djadmin_qa/reimbursement_web_view/',
               options: Options(
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},
@@ -1637,7 +1637,7 @@ class _ReimbursementState extends State<Reimbursement> {
           };
 
           final Response<String> result = await Dio().request(
-              'https://genworks.kaspontech.com/djadmin/reimbursement_web_view/',
+              'https://genworks.kaspontech.com/djadmin_qa/reimbursement_web_view/',
               options: Options(
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},

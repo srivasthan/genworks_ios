@@ -98,7 +98,7 @@ class _SpareInventory extends State<SpareInventory> {
             width: 5.0,
           ),
           const Text(
-            'Impreset Spare',
+            'Imprest Spare',
             style: TextStyle(fontSize: 11.0),
             textAlign: TextAlign.center,
           ),
@@ -1117,37 +1117,6 @@ class _SpareInventory extends State<SpareInventory> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(right: 0.0),
-                child: SizedBox(
-                  child: Container(
-                    height: 25,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(int.parse("0xfff" "507a7d")),
-                          Color(int.parse("0xfff" "507a7d"))
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Center(
-                      child: GestureDetector(
-                        child: const Text(MyConstants.spareCode,
-                            style: TextStyle(
-                              color: Colors.white,
-                            )),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(
-              width: 1,
-            ),
-            Expanded(
-              child: Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: SizedBox(
                   child: Container(
@@ -1762,7 +1731,7 @@ class _SpareInventory extends State<SpareInventory> {
                   ),
                   child: Center(
                     child: GestureDetector(
-                      child: const Text(MyConstants.toTechnician,
+                      child: const Text(MyConstants.fromTechnician,
                           style: TextStyle(
                             color: Colors.white,
                           )),
@@ -2062,24 +2031,6 @@ class _SpareInventory extends State<SpareInventory> {
                                                           : pendingFrmList[
                                                                   index]
                                                               .ticketId!,
-                                                      style: const TextStyle(
-                                                          fontSize: 11)),
-                                                ],
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Text(
-                                                      pendingFrmList[index]
-                                                                  .spareCode ==
-                                                              null
-                                                          ? MyConstants.na
-                                                          : pendingFrmList[
-                                                                  index]
-                                                              .spareCode!,
                                                       style: const TextStyle(
                                                           fontSize: 11)),
                                                 ],

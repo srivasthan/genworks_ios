@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -180,7 +179,8 @@ class _LoginState extends State<Login> {
         } else {
           return setToastMessage(context, MyConstants.internetConnection);
         }
-      } else {
+      }
+      else {
         return setToastMessage(context, MyConstants.emptyForm);
       }
     }
@@ -192,20 +192,7 @@ class _LoginState extends State<Login> {
         InAppUpdate.checkForUpdate().then((info) {
           setState(() {
             if (info.updateAvailability == 1) {
-              Navigator.of(context, rootNavigator: true).pop();
-              ArtSweetAlert.show(
-                  context: context,
-                  artDialogArgs: ArtDialogArgs(
-                      type: ArtSweetAlertType.success,
-                      title: MyConstants.appTittle,
-                      text: MyConstants.latestVersion,
-                      confirmButtonText: MyConstants.okButton,
-                      onConfirm: () {
-                        Navigator.of(context, rootNavigator: true).pop();
-                        if (appState == MyConstants.loginClick) doLogin(context);
-                      },
-                      confirmButtonColor:
-                          Color(int.parse("0xfff" "507a7d"))));
+              if (appState == MyConstants.loginClick) doLogin(context);
             } else if (info.updateAvailability == 2) {
               InAppUpdate.performImmediateUpdate().then((_) {
                 setState(() {
@@ -235,152 +222,162 @@ class _LoginState extends State<Login> {
         body: UpgradeAlert(
           child: Builder(
             builder: (BuildContext context) {
-              return Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage("assets/images/loginscreen_backgrd.png"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Form(
-                  key: formKey,
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                      child: Card(
-                        color: Colors.white,
-                        elevation: 5.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        margin: const EdgeInsets.only(right: 15.0, left: 15.0),
-                        child: Wrap(
-                          children: <Widget>[
-                            Center(
-                              child: Container(
-                                margin: const EdgeInsets.only(top: 20.0),
-                                child: const Text(
-                                  'Login',
-                                  style: TextStyle(fontSize: 20.0),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 20.0, right: 20.0, left: 20.0),
-                              child: TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                controller: emailController,
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                decoration: const InputDecoration(
-                                    labelText: 'Email',
-                                    contentPadding:
-                                        EdgeInsets.fromLTRB(10, 10, 10, 0),
-                                    border: OutlineInputBorder(),
-                                    prefixIcon:
-                                        Icon(Icons.person_add_alt_1)),
-                                validator: validateEmail,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 20.0, right: 20.0, left: 20.0),
-                              child: TextFormField(
-                                keyboardType: TextInputType.text,
-                                controller: passwordController,
-                                autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                decoration: InputDecoration(
-                                    labelText: 'Password',
-                                    contentPadding:
-                                        const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                                    border: const OutlineInputBorder(),
-                                    prefixIcon: const Icon(Icons.lock),
-                                    suffixIcon: IconButton(
-                                      onPressed: _toggleVisibility,
-                                      icon: _isPasswordHidden
-                                          ? const Icon(Icons.visibility_off)
-                                          : const Icon(Icons.visibility),
-                                    )),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return "Please enter password";
-                                  }
-                                  return null;
-                                },
-                                obscureText: _isPasswordHidden,
-                              ),
-                            ),
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 20),
-                                child: Container(
-                                  width: 150,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Color(
-                                            int.parse("0xfff" "898e8f")),
-                                        Color(int.parse("0xfff" "507a7d"))
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: const [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        offset: Offset(5, 5),
-                                        blurRadius: 10,
-                                      )
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        checkForUpdate(
-                                            MyConstants.loginClick);
-                                      },
-                                      child: const Text('SIGN IN',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                          )),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                    top: 10.0, bottom: 15.0),
-                                child: Center(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ForgotPassword()));
-                                    },
-                                    child: Text(
-                                      "Forgot Password?",
-                                      style: TextStyle(
-                                          color: Color(int.parse(
-                                              "0xfff" "2b6c72")),
-                                          fontSize: 15.0),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  padding: const EdgeInsets.only(top: 60),
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/loginscreen_backgrd.png"),
                     ),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.only(top: 60),
+                    alignment: Alignment.center,
+                    child: Form(
+                        key: formKey,
+                        child: Container(
+                          height: 350,
+                          padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+                          child: Card(
+                            color: Colors.white,
+                            elevation: 5.0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            margin: const EdgeInsets.only(right: 15.0, left: 15.0),
+                            child: Wrap(
+                              children: <Widget>[
+                                Center(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 20.0),
+                                    child: const Text(
+                                      'Login',
+                                      style: TextStyle(fontSize: 20.0),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 20.0, right: 20.0, left: 20.0),
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.emailAddress,
+                                    controller: emailController,
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    decoration: const InputDecoration(
+                                        labelText: 'Email',
+                                        contentPadding:
+                                        EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                        border: OutlineInputBorder(),
+                                        prefixIcon:
+                                        Icon(Icons.person_add_alt_1)),
+                                    validator: validateEmail,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 20.0, right: 20.0, left: 20.0),
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.text,
+                                    controller: passwordController,
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    decoration: InputDecoration(
+                                        labelText: 'Password',
+                                        contentPadding:
+                                        const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                        border: const OutlineInputBorder(),
+                                        prefixIcon: const Icon(Icons.lock),
+                                        suffixIcon: IconButton(
+                                          onPressed: _toggleVisibility,
+                                          icon: _isPasswordHidden
+                                              ? const Icon(Icons.visibility_off)
+                                              : const Icon(Icons.visibility),
+                                        )),
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return "Please enter password";
+                                      }
+                                      return null;
+                                    },
+                                    obscureText: _isPasswordHidden,
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (formKey.currentState!.validate()) {
+                                      checkForUpdate(
+                                          MyConstants.loginClick);
+                                    }else {setToastMessage(context, MyConstants.emptyForm);
+                                    }
+                                  },
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 20),
+                                      child: Container(
+                                        width: 150,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              Color(
+                                                  int.parse("0xfff" "898e8f")),
+                                              Color(int.parse("0xfff" "507a7d"))
+                                            ],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              offset: Offset(5, 5),
+                                              blurRadius: 10,
+                                            )
+                                          ],
+                                        ),
+                                        child: const Center(
+                                            child: Text('SIGN IN',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ))
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 20),
+                                  child: Container(
+                                    margin: const EdgeInsets.only(
+                                        top: 10.0, bottom: 15.0),
+                                    child: Center(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ForgotPassword()));
+                                        },
+                                        child: Text(
+                                          "Forgot Password?",
+                                          style: TextStyle(
+                                              color: Color(int.parse(
+                                                  "0xfff" "2b6c72")),
+                                              fontSize: 15.0),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                    )
                   ),
                 ),
               );

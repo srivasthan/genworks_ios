@@ -1475,7 +1475,8 @@ class _KnowledgeState extends State<KnowledgeBase> {
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(
-                            labelText: MyConstants.problemDescription,
+                            labelText: MyConstants.search,
+                            prefixIcon: Icon(Icons.search),
                             contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                             border: OutlineInputBorder()),
                       ),

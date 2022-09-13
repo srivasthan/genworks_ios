@@ -71,6 +71,7 @@ class _AMCState extends State<AMC> {
                           keyboardType: TextInputType.text,
                           decoration: const InputDecoration(
                               labelText: MyConstants.searchAmc,
+                              prefixIcon: Icon(Icons.search),
                               contentPadding:
                                   EdgeInsets.fromLTRB(10, 10, 10, 0),
                               border: OutlineInputBorder()),

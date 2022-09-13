@@ -407,6 +407,7 @@ class MyConstants {
   static const String dirPath = "dir_path";
   static const String addSpareTransfer = "Add spare transfer request";
   static const String addConsumedSpare = "Add consumed spare";
+  static const String updateStatus = "update_status";
   static const String reminder = "Reminder";
   static const String otp = "Enter OTP";
   static const String otpHint = "Enter OTP Here";
