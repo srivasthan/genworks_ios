@@ -187,7 +187,7 @@ class _OnHandSpareState extends State<OnHandSpare> {
     }
   }
 
-  void getConsumedSpareData(int index) async {
+  void getConsumedSpareData(int index, String source) async {
     final database =
         await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
     final consumedSpareRequestDataDao = database.consumedSpareRequestDataDao;
@@ -197,8 +197,13 @@ class _OnHandSpareState extends State<OnHandSpare> {
     setState(() {
       if (consumedSpareRequestData[index].upDateSpare == true) {
         _cartIncrement--;
-        consumedSpareRequestDataDao.updateConsumedSpare(
-            false, consumedSpareRequestData[index].spareId);
+        if(source == MyConstants.api) {
+          consumedSpareRequestDataDao.updateConsumedSpare(
+              false, onHandPrimarySpareList[index].spareId.toString());
+        } else if(source == MyConstants.searchedSpare) {
+          consumedSpareRequestDataDao.updateConsumedSpare(
+              false, onHandPrimarySpareList[index].spareId.toString());
+        }
         _cart = MyConstants.addToCartButton +
             MyConstants.openBracket +
             _cartIncrement.toString() +
@@ -207,8 +212,13 @@ class _OnHandSpareState extends State<OnHandSpare> {
       }
       else {
         _cartIncrement++;
-        consumedSpareRequestDataDao.updateConsumedSpare(
-            true, consumedSpareRequestData[index].spareId);
+        if(source == MyConstants.api) {
+          consumedSpareRequestDataDao.updateConsumedSpare(
+              true, consumedSpareRequestDataList[index].spareId.toString());
+        } else if(source == MyConstants.searchedSpare) {
+          consumedSpareRequestDataDao.updateConsumedSpare(
+              true, consumedSpareRequestDataList[index].spareId.toString());
+        }
         _cart = MyConstants.addToCartButton +
             MyConstants.openBracket +
             _cartIncrement.toString() +
@@ -540,7 +550,7 @@ class _OnHandSpareState extends State<OnHandSpare> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            getConsumedSpareData(index);
+                            getConsumedSpareData(index, MyConstants.api);
                           });
                         },
                         child: Container(
@@ -653,7 +663,7 @@ class _OnHandSpareState extends State<OnHandSpare> {
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    getConsumedSpareData(index);
+                    getConsumedSpareData(index, MyConstants.searchedSpare);
                   });
                 },
                 child: Container(

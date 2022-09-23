@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -52,8 +53,8 @@ class _DashBoardMenuState extends State<DashBoardMenu> {
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: SizedBox(
-                            height: 80,
-                            width: 80,
+                            height: 40,
+                            width: 40,
                             child: ClipOval(
                               child: Image.asset(
                                 'assets/images/user_image.png',
@@ -87,9 +88,7 @@ class _DashBoardMenuState extends State<DashBoardMenu> {
                                   Icons.star,
                                   color: Colors.amber,
                                 ),
-                                onRatingUpdate: (rating) {
-                                  print(rating);
-                                },
+                                onRatingUpdate: (rating) {},
                               ),
                             )
                           ],
@@ -117,11 +116,11 @@ class _DashBoardMenuState extends State<DashBoardMenu> {
 }
 
 class DotsIndicator extends AnimatedWidget {
-  DotsIndicator({super.key,
+  DotsIndicator({
     this.controller,
     this.itemCount,
     this.onPageSelected,
-    this.color: Colors.white,
+    this.color = Colors.white,
   }) : super(listenable: controller!);
 
   /// The PageController that this DotsIndicator is representing.
@@ -173,6 +172,7 @@ class DotsIndicator extends AnimatedWidget {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -215,147 +215,144 @@ class ChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        PreferenceUtils.init();
-        if (PreferenceUtils.getInteger(MyConstants.punchStatus) ==
-            0) {
-          setToastMessage(context, MyConstants.punchIn);
-        } else {
-          if (choice.title == MyConstants.home) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => DashBoard()));
-          } else if (choice.title == MyConstants.ticketList) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const TicketList(0)));
-          } else if (choice.title == MyConstants.serviceReport) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ServiceReport(
-                      selectedIndex: 0,
-                    )));
-          } else if (choice.title == MyConstants.knowledgeBase) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => KnowledgeBase()));
-          } else if (choice.title == MyConstants.spareInventory) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                    const SpareInventory(0, MyConstants.bar)));
-          } else if (choice.title == MyConstants.training) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const Training(
-                      selectedIndex: 0,
-                    )));
-          } else if (choice.title == MyConstants.amc) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const AMC()));
-          } else if (choice.title == MyConstants.reimbursement) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const Reimbursement(
+        onTap: () {
+          PreferenceUtils.init();
+          if (PreferenceUtils.getInteger(MyConstants.punchStatus) ==
+              0) {
+            setToastMessage(context, MyConstants.punchIn);
+          } else {
+            if (choice.title == MyConstants.home) {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => DashBoard()));
+            } else if (choice.title == MyConstants.ticketList) {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const TicketList(0)));
+            } else if (choice.title == MyConstants.serviceReport) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ServiceReport(
                         selectedIndex: 0,
-                        backButton: MyConstants.empty)));
-          } else if (choice.title == MyConstants.smartScheduling) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const SmartScheduling()));
+                      )));
+            } else if (choice.title == MyConstants.knowledgeBase) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => KnowledgeBase()));
+            } else if (choice.title == MyConstants.spareInventory) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                      const SpareInventory(0, MyConstants.bar)));
+            } else if (choice.title == MyConstants.training) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Training(
+                        selectedIndex: 0,
+                      )));
+            } else if (choice.title == MyConstants.amcHints) {
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const AMC()));
+            } else if (choice.title == MyConstants.reimbursement) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Reimbursement(
+                          selectedIndex: 0,
+                          backButton: MyConstants.empty)));
+            } else if (choice.title == MyConstants.smartScheduling) {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SmartScheduling()));
+            }
           }
-        }
-      },
-      child: Center(
+        },
         child: Column(children: [
-          Expanded(
-              child: IconButton(
-                onPressed: () {
-                  PreferenceUtils.init();
-                  if (PreferenceUtils.getInteger(
-                      MyConstants.punchStatus) ==
-                      0) {
-                    setToastMessage(context, MyConstants.punchIn);
-                  } else {
-                    if (choice.title == MyConstants.home) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DashBoard()));
-                    } else if (choice.title == MyConstants.ticketList) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const TicketList(0)));
-                    } else if (choice.title ==
-                        MyConstants.serviceReport) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ServiceReport(
-                                selectedIndex: 0,
-                              )));
-                    } else if (choice.title ==
-                        MyConstants.knowledgeBase) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => KnowledgeBase()));
-                    } else if (choice.title ==
-                        MyConstants.spareInventory) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SpareInventory(
-                                  0, MyConstants.bar)));
-                    } else if (choice.title == MyConstants.training) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Training(
-                                selectedIndex: 0,
-                              )));
-                    } else if (choice.title == MyConstants.amc) {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (context) => const AMC()));
-                    } else if (choice.title ==
-                        MyConstants.reimbursement) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Reimbursement(
-                                  selectedIndex: 0,
-                                  backButton: MyConstants.empty)));
-                    } else if (choice.title ==
-                        MyConstants.smartScheduling) {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SmartScheduling()));
-                    }
-                  }
-                },
-                icon: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: FittedBox(fit: BoxFit.cover, child: choice.icon),
-                ),
-              )),
+          IconButton(
+            onPressed: () {
+              PreferenceUtils.init();
+              if (PreferenceUtils.getInteger(
+                  MyConstants.punchStatus) ==
+                  0) {
+                setToastMessage(context, MyConstants.punchIn);
+              } else {
+                if (choice.title == MyConstants.home) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => DashBoard()));
+                } else if (choice.title == MyConstants.ticketList) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TicketList(0)));
+                } else if (choice.title ==
+                    MyConstants.serviceReport) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ServiceReport(
+                            selectedIndex: 0,
+                          )));
+                } else if (choice.title ==
+                    MyConstants.knowledgeBase) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => KnowledgeBase()));
+                } else if (choice.title ==
+                    MyConstants.spareInventory) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SpareInventory(
+                              0, MyConstants.bar)));
+                } else if (choice.title == MyConstants.training) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Training(
+                            selectedIndex: 0,
+                          )));
+                } else if (choice.title == MyConstants.amcHints) {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const AMC()));
+                } else if (choice.title ==
+                    MyConstants.reimbursement) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Reimbursement(
+                              selectedIndex: 0,
+                              backButton: MyConstants.empty)));
+                } else if (choice.title ==
+                    MyConstants.smartScheduling) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SmartScheduling()));
+                }
+              }
+            },
+            icon: SizedBox(
+              height: 36,
+              width: 36,
+              child: choice.icon,
+            ),
+          ),
           Text(choice.title!,
-              style: const TextStyle(fontSize: 13, color: Colors.white)),
-        ]),
-      ),
+              style: const TextStyle(fontSize: 13.0, color: Colors.white))
+        ])
     );
   }
 }
 
 const List<Choice> choices1 = [
   Choice(
-      title: 'Amc contract',
+      title: 'Amc Contracts',
       icon: ImageIcon(AssetImage(
         "assets/images/planning.png",
       ), color: Colors.white)),

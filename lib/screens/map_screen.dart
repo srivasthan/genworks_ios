@@ -1,43 +1,44 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:ui' as ui;
-import 'package:location/location.dart' as pl;
+import 'package:location/location.dart' as prefixLocation;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fieldpro_genworks_healthcare/network/Response/google_direction_results.dart';
+import 'package:fieldpro_genworks_healthcare/network/api_services.dart';
+import 'package:fieldpro_genworks_healthcare/network/db/app_database.dart';
+import 'package:fieldpro_genworks_healthcare/network/db/direction_details.dart';
+import 'package:fieldpro_genworks_healthcare/network/db/direction_details_dao.dart';
+import 'package:fieldpro_genworks_healthcare/network/db/ticket_for_the_day.dart';
+import 'package:fieldpro_genworks_healthcare/screens/amc_ticket_details.dart';
+import 'package:fieldpro_genworks_healthcare/screens/file_directory.dart';
+import 'package:fieldpro_genworks_healthcare/screens/show_image.dart';
+import 'package:fieldpro_genworks_healthcare/screens/start_ticket.dart';
+import 'package:fieldpro_genworks_healthcare/screens/ticket_list.dart';
+import 'package:fieldpro_genworks_healthcare/utility/shared_preferences.dart';
+import 'package:fieldpro_genworks_healthcare/utility/store_strings.dart';
+import 'package:fieldpro_genworks_healthcare/utility/validator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'package:permission_handler/permission_handler.dart';
 
-import '../network/Response/google_direction_results.dart';
-import '../network/api_services.dart';
-import '../network/db/app_database.dart';
-import '../network/db/direction_details.dart';
-import '../network/db/direction_details_dao.dart';
-import '../network/db/ticket_for_the_day.dart';
-import '../utility/shared_preferences.dart';
-import '../utility/store_strings.dart';
-import '../utility/validator.dart';
-import 'amc_ticket_details.dart';
-import 'file_directory.dart';
-import 'show_image.dart';
-import 'start_ticket.dart';
-import 'ticket_list.dart';
+///created by srivasthan
+///modified by sharubala
+///changes suggested by senthilkumar
 
 class MapView extends StatefulWidget {
   final double? destinationLatitude, destinationLongitude;
-  final String? ticketId, priority, location, status, screenType;
+  final String? ticketId, priority, location, screenType, status;
   final int? ticketType;
 
   const MapView(
@@ -48,17 +49,17 @@ class MapView extends StatefulWidget {
       this.location,
       this.status,
       this.ticketType,
-      this.screenType, {super.key});
+      this.screenType);
 
   @override
   _MapViewState createState() => _MapViewState();
 }
 
 class _MapViewState extends State<MapView> {
-  final CameraPosition _initialLocation = const CameraPosition(target: LatLng(0.0, 0.0));
+  CameraPosition _initialLocation = const CameraPosition(target: LatLng(0.0, 0.0));
   GoogleMapController? mapController;
   File? image, capturedImage;
-  bool? _showLocationAlert = false, _showDoneAlert = true;
+  bool? _showLocationAlert = false, _showDoneAlert = true, _reachedClicked = false;
 
   late Position _currentPosition;
   String? showInfoWindow;
@@ -70,7 +71,7 @@ class _MapViewState extends State<MapView> {
   final desrinationAddressFocusNode = FocusNode();
   String? _selectedMode;
   bool _showReachButton = false, _showBottomSheet = false, _showTick = false;
-  final TextEditingController _travelCostController = TextEditingController();
+  TextEditingController _travelCostController = TextEditingController();
 
   Set<Marker> markers = {};
   String? _startAddress, _destinationAddress, _time, _distance, encImageBase64;
@@ -100,13 +101,14 @@ class _MapViewState extends State<MapView> {
     }
 
     await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.medium)
+        desiredAccuracy: LocationAccuracy.medium)
         .then((Position position) async {
       setState(() {
         _currentPosition = position;
       });
       await _showMap();
     }).catchError((e) {
+      print(e);
     });
   }
 
@@ -158,7 +160,7 @@ class _MapViewState extends State<MapView> {
       double northEastLongitude = maxx;
 
       // Create storage
-      const storage = FlutterSecureStorage();
+      final storage = const FlutterSecureStorage();
 
       // Write value
       await storage.write(
@@ -176,18 +178,19 @@ class _MapViewState extends State<MapView> {
             northeast: LatLng(northEastLatitude, northEastLongitude),
             southwest: LatLng(southWestLatitude, southWestLongitude),
           ),
-          50.0,
+          175.0,
         ),
+
       );
 
       final database =
-          await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
+      await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
       final directionDetailsDao = database.directionDetailsDao;
 
       var directionDetails = await directionDetailsDao
           .findDirectionDetailsTableByTicketId(widget.ticketId!);
 
-      if (directionDetails.isNotEmpty) {
+      if (directionDetails.length > 0) {
         setToastMessage(context, "Direction from database");
 
         _startAddress = directionDetails[0].startAddress;
@@ -230,18 +233,18 @@ class _MapViewState extends State<MapView> {
       }
 
       final Uint8List smarkerIcon =
-          await getBytesFromAsset('assets/images/spoint.png', 100);
+      await getBytesFromAsset('assets/images/spoint.png', 100);
       final Uint8List dmarkerIcon =
-          await getBytesFromAsset('assets/images/dpoint.png', 100);
+      await getBytesFromAsset('assets/images/dpoint.png', 100);
 
       Marker startMarker = Marker(
         markerId: MarkerId(startCoordinatesString),
         position: LatLng(startLatitude, startLongitude),
         infoWindow: widget.status != MyConstants.travelStarted
             ? InfoWindow(
-                title: 'DISTANCE: ${_distance!}',
-                snippet: 'Time: ${_time!}',
-                onTap: () => _travelPlanAlert(context))
+            title: 'DISTANCE: ${_distance!}',
+            snippet: 'Time: ${_time!}',
+            onTap: () => _travelPlanAlert(context))
             : const InfoWindow(),
         icon: BitmapDescriptor.fromBytes(smarkerIcon),
       );
@@ -251,9 +254,9 @@ class _MapViewState extends State<MapView> {
         position: LatLng(destinationLatitude, destinationLongitude),
         infoWindow: widget.status != MyConstants.travelStarted
             ? InfoWindow(
-                title: 'DISTANCE: ${_distance!}',
-                snippet: 'Time: ${_time!}',
-                onTap: () => _travelPlanAlert(context))
+            title: 'DISTANCE: ${_distance!}',
+            snippet: 'Time: ${_time!}',
+            onTap: () => _travelPlanAlert(context))
             : const InfoWindow(),
         icon: BitmapDescriptor.fromBytes(dmarkerIcon),
       );
@@ -268,6 +271,7 @@ class _MapViewState extends State<MapView> {
 
       Navigator.of(context, rootNavigator: true).pop();
     } catch (e) {
+      print(e);
     }
   }
 
@@ -283,13 +287,13 @@ class _MapViewState extends State<MapView> {
 
   // Create the polylines for showing the route between two places
   _createPolylines(
-    double startLatitude,
-    double startLongitude,
-    double destinationLatitude,
-    double destinationLongitude,
-    DirectionDetailsDao directionDetailsDao,
-    String? mapKey,
-  ) async {
+      double startLatitude,
+      double startLongitude,
+      double destinationLatitude,
+      double destinationLongitude,
+      DirectionDetailsDao directionDetailsDao,
+      String? mapKey,
+      ) async {
     polylinePoints = PolylinePoints();
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       mapKey!, // Google Maps API Key
@@ -328,7 +332,7 @@ class _MapViewState extends State<MapView> {
         // pushPage(context);
         return false;
       },
-      child: SizedBox(
+      child: Container(
         height: height,
         width: width,
         child: Scaffold(
@@ -360,12 +364,12 @@ class _MapViewState extends State<MapView> {
 
                   if (Platform.isIOS) {
                     await Permission.location.request();
-                    pl.Location location =
-                        pl.Location();
+                    prefixLocation.Location location =
+                    prefixLocation.Location();
                     var permissionGranted = await location.hasPermission();
 
                     if (permissionGranted !=
-                        pl.PermissionStatus.granted) {
+                        prefixLocation.PermissionStatus.granted) {
                       showAlert(context);
                       setState(() {
                         _showLocationAlert = true;
@@ -452,7 +456,8 @@ class _MapViewState extends State<MapView> {
                                     _currentPosition.latitude,
                                     _currentPosition.longitude,
                                   ),
-                                  zoom: 18.0,
+                                  zoom
+                                      : 8.0,///value changed
                                 ),
                               ),
                             );
@@ -468,7 +473,6 @@ class _MapViewState extends State<MapView> {
                 child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      height: MediaQuery.of(context).size.height / 6,
                       decoration: const BoxDecoration(
                         color: Colors.white,
                       ),
@@ -483,7 +487,7 @@ class _MapViewState extends State<MapView> {
                                     _currentPosition.latitude,
                                     _currentPosition.longitude,
                                   ),
-                                  zoom: 18.0,
+                                  zoom: 18.0,///value changed
                                 ),
                               ),
                             );
@@ -498,56 +502,22 @@ class _MapViewState extends State<MapView> {
                                 child: Row(
                                   children: [
                                     const Expanded(
-                                        flex: 2,
+                                        flex: 0,
                                         child: Text(
-                                          MyConstants.ticketId,
-                                          style: TextStyle(fontSize: 18.0),
+                                          "${MyConstants.ticketId}   :",
+                                          style: TextStyle(fontSize: 14.0),///font size changed
                                         )),
                                     const SizedBox(
                                       height: 10.0,
                                     ),
-                                    const Expanded(
-                                        flex: 0,
-                                        child: Text(":", style: TextStyle(fontWeight: FontWeight.bold))
-                                    ),
                                     Expanded(
-                                      flex: 6,
                                         child: Padding(
-                                      padding: const EdgeInsets.only(left: 15.0),
-                                      child: Text(
-                                        widget.ticketId!,
-                                        style: const TextStyle(fontSize: 18.0),
-                                      ),
-                                    )),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10.0,
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Row(
-                                  children: [
-                                    const Expanded(
-                                        flex: 2,
-                                        child: Text(
-                                          MyConstants.priority,
-                                          style: TextStyle(fontSize: 18.0),
+                                          padding: const EdgeInsets.only(left: 15.0),
+                                          child: Text(
+                                            widget.ticketId!,
+                                            style: const TextStyle(fontSize: 14.0),///font size changed
+                                          ),
                                         )),
-                                    const Expanded(
-                                        flex: 0,
-                                        child: Text(":", style: TextStyle(fontWeight: FontWeight.bold))
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                        child: Padding(
-                                      padding: const EdgeInsets.only(left: 15.0),
-                                      child: Text(
-                                        widget.priority!,
-                                        style: const TextStyle(fontSize: 18.0),
-                                      ),
-                                    )),
                                   ],
                                 ),
                               ),
@@ -559,24 +529,43 @@ class _MapViewState extends State<MapView> {
                                 child: Row(
                                   children: [
                                     const Expanded(
-                                        flex: 2,
+                                        flex: 0,
                                         child: Text(
-                                          MyConstants.location,
-                                          style: TextStyle(fontSize: 18.0),
+                                          "${MyConstants.priority}      :",
+                                          style: TextStyle(fontSize: 14.0),///font size changed
                                         )),
+                                    Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 15.0),
+                                          child: Text(
+                                            widget.priority!,
+                                            style: const TextStyle(fontSize: 14.0),///font size changed
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              Expanded(
+                                flex: 0,
+                                child: Row(
+                                  children: [
                                     const Expanded(
                                         flex: 0,
-                                        child: Text(":", style: TextStyle(fontWeight: FontWeight.bold))
-                                    ),
+                                        child: Text(
+                                          "${MyConstants.location}   :",
+                                          style: TextStyle(fontSize: 14.0),///font size changed
+                                        )),
                                     Expanded(
-                                      flex: 6,
                                         child: Padding(
-                                      padding: const EdgeInsets.only(left: 15.0),
-                                      child: Text(
-                                        widget.location!,
-                                        style: const TextStyle(fontSize: 18.0),
-                                      ),
-                                    )),
+                                          padding: const EdgeInsets.only(left: 15.0),
+                                          child: Text(
+                                            widget.location!,
+                                            style: const TextStyle(fontSize: 14.0),///font size changed
+                                          ),
+                                        )),
                                   ],
                                 ),
                               ),
@@ -588,7 +577,7 @@ class _MapViewState extends State<MapView> {
               ),
               Visibility(
                 visible: _showReachButton,
-                child: Align(
+                child: _reachedClicked == false ? Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
                       padding: const EdgeInsets.all(15.0),
@@ -597,19 +586,29 @@ class _MapViewState extends State<MapView> {
                         child: ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              onReachedTechnician(context);
+                              if(_reachedClicked == true) {
+                                setToastMessage(context, MyConstants.requestAlready);
+                              } else {
+                                onReachedTechnician(context);
+                              }
+                              _reachedClicked = true;
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(10.0)), backgroundColor: Color(int.parse("0xfff" "5C7E7F"))),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(8.0),
+                                    topLeft: Radius.circular(8.0),
+                                    topRight: Radius.circular(8.0),
+                                    bottomRight: Radius.circular(8.0)///Button size changed
+                                ),
+                              ), backgroundColor: Color(int.parse("0xfff" "5C7E7F"))),
                           child: const Text(MyConstants.reachedButton,
                               style:
-                                  TextStyle(fontSize: 15, color: Colors.white)),
+                              TextStyle(fontSize: 15, color: Colors.white)),
                         ),
                       )),
-                ),
+                ) : Container(),
               )
             ],
           ),
@@ -628,7 +627,7 @@ class _MapViewState extends State<MapView> {
               title: const Center(child: Text(MyConstants.chooseModeOfTransport)),
               content: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: SizedBox(
+                child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -847,13 +846,16 @@ class _MapViewState extends State<MapView> {
                           child: Padding(
                             padding: const EdgeInsets.only(right: 15.0),
                             child: GestureDetector(
-                              onTap: () => Navigator.of(context).pop(),
+                              onTap: () {
+                                Navigator.of(context, rootNavigator: true).pop();
+                                // Navigator.of(context, rootNavigator: true).pop();
+                              },
                               child: Text(
                                 MyConstants.cancelButton,
                                 style: TextStyle(
                                     fontSize: 18.0,
                                     color:
-                                        Color(int.parse("0xfff" "507a7d"))),
+                                    Color(int.parse("0xfff" "507a7d"))),
                               ),
                             ),
                           ))
@@ -870,10 +872,11 @@ class _MapViewState extends State<MapView> {
       String? value, BuildContext context) async {
     if (await checkInternetConnection() == true) {
       Navigator.of(context, rootNavigator: true).pop();
+      // Navigator.of(context, rootNavigator: true).pop();
       setToastMessageLoading(context);
 
       final database =
-          await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
+      await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
       final ticketForTheDayDao = database.ticketForTheDayDao;
 
       Map<String, dynamic> startTravelData = {
@@ -885,7 +888,7 @@ class _MapViewState extends State<MapView> {
         'source_lat': latitude,
         'source_long': longitude,
         'technician_code':
-            PreferenceUtils.getString(MyConstants.technicianCode),
+        PreferenceUtils.getString(MyConstants.technicianCode),
         'ticket_id': widget.ticketId
       };
 
@@ -901,14 +904,13 @@ class _MapViewState extends State<MapView> {
               MyConstants.token, response.transferResponseEntity!.token!);
           ticketForTheDayDao.updateTravelPlanTicketData(
               value!, widget.ticketId!);
-          //  setToastMessage(context, "Travel started successfully");
         });
-      } else if (response.transferResponseEntity!.responseCode ==
+      }
+      else if (response.transferResponseEntity!.responseCode ==
           MyConstants.response400) {
         setState(() {
           PreferenceUtils.setString(
               MyConstants.token, response.transferResponseEntity!.token!);
-          // setToastMessage(context, "Something went wrong");
         });
       }
     } else {
@@ -918,15 +920,14 @@ class _MapViewState extends State<MapView> {
 
   Future<void> onReachedTechnician(BuildContext context) async {
     if (await checkInternetConnection() == true) {
-      //showAlertDialog(context);
       setToastMessageLoading(context);
 
       final database =
-          await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
+      await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
       final ticketForTheDayDao = database.ticketForTheDayDao;
       List<TicketForTheDayTable> ticketForTheDayAccess =
-          await ticketForTheDayDao
-              .findTicketForTheDayByTicketId(widget.ticketId!);
+      await ticketForTheDayDao
+          .findTicketForTheDayByTicketId(widget.ticketId!);
 
       ApiService apiService = ApiService(dio.Dio());
       final response = await apiService.getDistance(
@@ -937,80 +938,52 @@ class _MapViewState extends State<MapView> {
 
       if (response.getDistanceEntity!.responseCode == MyConstants.response200) {
         setState(() {
-          if (ticketForTheDayAccess[0].travelPlanTransport == MyConstants.cab ||
+          if (ticketForTheDayAccess[0].travelPlanTransport ==
+              MyConstants.cab ||
               ticketForTheDayAccess[0].travelPlanTransport ==
                   MyConstants.publicTransport) {
-            setState(() {
-              //Navigator.of(context, rootNavigator: true).pop();
-              ArtSweetAlert.show(
-                  context: context,
-                  artDialogArgs: ArtDialogArgs(
-                      type: ArtSweetAlertType.warning,
-                      title: MyConstants.appTittle,
-                      text: response.getDistanceEntity!.message! +
-                          MyConstants.wantToContinue,
-                      showCancelBtn: true,
-                      confirmButtonText: MyConstants.yesButton,
-                      cancelButtonText: MyConstants.noButton,
-                      onConfirm: () {
-                        Navigator.of(context, rootNavigator: true).pop();
-                        setState(() {
-                          if (ticketForTheDayAccess[0].travelPlanTransport ==
-                              MyConstants.cab ||
-                              ticketForTheDayAccess[0].travelPlanTransport ==
-                                  MyConstants.publicTransport) {
-                            ArtSweetAlert.show(
-                                context: context,
-                                artDialogArgs: ArtDialogArgs(
-                                    type: ArtSweetAlertType.warning,
-                                    title: MyConstants.appTittle,
-                                    text: MyConstants.updateTravel,
-                                    showCancelBtn: true,
-                                    confirmButtonText: MyConstants.nowButton,
-                                    cancelButtonText: MyConstants.laterButton,
-                                    onConfirm: () {
-                                      setState(() {
-                                        Navigator.of(context, rootNavigator: true)
-                                            .pop();
-                                        showModalBottomSheet(
-                                            context: context,
-                                            builder: (context) {
-                                              return travelCostBottomSheet(
-                                                  context,
-                                                  _startAddress,
-                                                  _destinationAddress,
-                                                  _distance,
-                                                  _time,
-                                                  ticketForTheDayAccess[0]
-                                                      .travelPlanTransport);
-                                            });
-                                      });
-                                    },
-                                    onCancel: () {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop();
-                                      endTravelPostApi();
-                                    },
-                                    cancelButtonColor:
-                                    Color(int.parse("0xfff" "C5C5C5")),
-                                    confirmButtonColor:
-                                    Color(int.parse("0xfff" "507a7d"))));
-                          } else {
-                            endTravelPostApi();
-                          }
-                        });
-                      },
-                      onCancel: () =>
-                          Navigator.of(context, rootNavigator: true).pop(),
-                      cancelButtonColor: Color(int.parse("0xfff" "C5C5C5")),
-                      confirmButtonColor: Color(int.parse("0xfff" "507a7d"))));
-            });
+            ArtSweetAlert.show(
+                context: context,
+                artDialogArgs: ArtDialogArgs(
+                    type: ArtSweetAlertType.warning,
+                    title: MyConstants.appTittle,
+                    text: MyConstants.updateTravel,
+                    showCancelBtn: true,
+                    confirmButtonText: MyConstants.nowButton,
+                    cancelButtonText: MyConstants.laterButton,
+                    onConfirm: () {
+                      setState(() {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop();
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return travelCostBottomSheet(
+                                  context,
+                                  _startAddress,
+                                  _destinationAddress,
+                                  _distance,
+                                  _time,
+                                  ticketForTheDayAccess[0]
+                                      .travelPlanTransport);
+                            });
+                      });
+                    },
+                    onCancel: () {
+                      Navigator.of(context, rootNavigator: true)
+                          .pop();
+                      endTravelPostApi();
+                    },
+                    cancelButtonColor:
+                    Color(int.parse("0xfff" "C5C5C5")),
+                    confirmButtonColor:
+                    Color(int.parse("0xfff" "507a7d"))));
           } else {
             endTravelPostApi();
           }
         });
       } else if (response.getDistanceEntity!.responseCode ==
-              MyConstants.response400 ||
+          MyConstants.response400 ||
           response.getDistanceEntity!.responseCode == MyConstants.response500) {
         setState(() {
           //Navigator.of(context, rootNavigator: true).pop();
@@ -1028,7 +1001,7 @@ class _MapViewState extends State<MapView> {
                     Navigator.of(context, rootNavigator: true).pop();
                     setState(() {
                       if (ticketForTheDayAccess[0].travelPlanTransport ==
-                              MyConstants.cab ||
+                          MyConstants.cab ||
                           ticketForTheDayAccess[0].travelPlanTransport ==
                               MyConstants.publicTransport) {
                         ArtSweetAlert.show(
@@ -1064,16 +1037,20 @@ class _MapViewState extends State<MapView> {
                                   endTravelPostApi();
                                 },
                                 cancelButtonColor:
-                                    Color(int.parse("0xfff" "C5C5C5")),
+                                Color(int.parse("0xfff" "C5C5C5")),
                                 confirmButtonColor:
-                                    Color(int.parse("0xfff" "507a7d"))));
+                                Color(int.parse("0xfff" "507a7d"))));
                       } else {
                         endTravelPostApi();
                       }
                     });
                   },
-                  onCancel: () =>
-                      Navigator.of(context, rootNavigator: true).pop(),
+                  onCancel: () {
+                    setState(() {
+                      _reachedClicked = false;
+                    });
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
                   cancelButtonColor: Color(int.parse("0xfff" "C5C5C5")),
                   confirmButtonColor: Color(int.parse("0xfff" "507a7d"))));
         });
@@ -1092,326 +1069,328 @@ class _MapViewState extends State<MapView> {
       String travelPlanTransport) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter myState) {
-      return SingleChildScrollView(
-        child: Column(children: [
-          Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  color: Color(int.parse("0xfff" "5C7E7F")),
-                  borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10.0),
-                      bottomRight: Radius.circular(10.0))),
-              child: Padding(
-                  padding: const EdgeInsets.only(left: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      const Text(
-                        MyConstants.travelCost,
-                        style: TextStyle(color: Colors.white),
+          return SingleChildScrollView(
+            child: Container(
+              child: Column(children: [
+                Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(int.parse("0xfff" "5C7E7F")),
+                        borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(10.0))),
+                    child: Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            const Text(
+                              MyConstants.travelCost,
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Colors.white,
+                                ))
+                          ],
+                        ))),
+                Container(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: <
+                        Widget>[
+                      const SizedBox(
+                        height: 10.0,
                       ),
-                      IconButton(
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.origin,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Text(startAddress!,
+                                      style: const TextStyle(fontSize: 15)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.destination,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Text(destinationAddress!,
+                                      style: const TextStyle(fontSize: 15)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.travelDistance,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Text(distance!,
+                                      style: const TextStyle(fontSize: 15)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.travelTime,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child:
+                                  Text(time!, style: const TextStyle(fontSize: 15)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.travelMode,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Text(travelPlanTransport,
+                                      style: const TextStyle(fontSize: 15)),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.travelCharge,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0, right: 20.0),
+                                  child: TextFormField(
+                                    keyboardType: TextInputType.number,
+                                    controller: _travelCostController,
+                                    autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
+                                    decoration: const InputDecoration(
+                                        labelText: MyConstants.enterTravelAmount,
+                                        border: OutlineInputBorder()),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        children: [
+                          const Padding(padding: EdgeInsets.all(5.0)),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const <Widget>[
+                                Text(MyConstants.attachment,
+                                    style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 0,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                          context: context,
+                                          barrierColor:
+                                          Colors.black.withAlpha(150),
+                                          builder: (context) {
+                                            return imageBottomSheet(context, myState);
+                                          });
+                                    },
+                                    //captureImage(Myconstants.camera, myState),
+                                    child: const Text(MyConstants.attachmentString,
+                                        style: TextStyle(
+                                            color: Colors.lightBlue, fontSize: 15)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 0,
+                            child: Visibility(
+                              visible: _showTick,
+                              child: IconButton(
+                                onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ShowImage(
+                                            image: "",
+                                            capturedImage: capturedImage))),
+                                icon: Image.asset(
+                                  'assets/images/check.png',
+                                  width: 25,
+                                  height: 25,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Center(
+                        child: ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            if (_travelCostController.text.isEmpty) {
+                              setToastMessage(context, MyConstants.travelCostError);
+                            } else if(encImageBase64 == null) {
+                              setToastMessage(context, MyConstants.attachmentImageError);
+                            } else {
+                              Navigator.of(context).pop();
+                              callTravelPlanTransportBill();
+                            }
                           },
-                          icon: const Icon(
-                            Icons.clear,
-                            color: Colors.white,
-                          ))
-                    ],
-                  ))),
-          Container(
-              padding: const EdgeInsets.only(top: 5),
-              child: Column(mainAxisSize: MainAxisSize.min, children: <
-                  Widget>[
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.origin,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(startAddress!,
-                                style: const TextStyle(fontSize: 15)),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.destination,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(destinationAddress!,
-                                style: const TextStyle(fontSize: 15)),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.travelDistance,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(distance!,
-                                style: const TextStyle(fontSize: 15)),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.travelTime,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child:
-                                Text(time!, style: const TextStyle(fontSize: 15)),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.travelMode,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(travelPlanTransport,
-                                style: const TextStyle(fontSize: 15)),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.travelCharge,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0, right: 20.0),
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              controller: _travelCostController,
-                              autovalidateMode:
-                                  AutovalidateMode.onUserInteraction,
-                              decoration: const InputDecoration(
-                                  labelText: MyConstants.enterTravelAmount,
-                                  border: OutlineInputBorder()),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 10.0,
-                ),
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(5.0)),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          Text(MyConstants.attachment,
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                showModalBottomSheet(
-                                    context: context,
-                                    barrierColor:
-                                    Colors.black.withAlpha(150),
-                                    builder: (context) {
-                                      return imageBottomSheet(context, myState);
-                                    });
-                              },
-                                  //captureImage(Myconstants.camera, myState),
-                              child: const Text(MyConstants.attachmentString,
-                                  style: TextStyle(
-                                      color: Colors.lightBlue, fontSize: 15)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: Visibility(
-                        visible: _showTick,
-                        child: IconButton(
-                          onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ShowImage(
-                                      image: "",
-                                      capturedImage: capturedImage))),
-                          icon: Image.asset(
-                            'assets/images/check.png',
-                            width: 25,
-                            height: 25,
-                          ),
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0)), backgroundColor: Color(int.parse("0xfff" "3eccbb")),
+                              minimumSize: const Size(140, 35)),
+                          child: const Text(MyConstants.submitButton,
+                              style: TextStyle(fontSize: 15, color: Colors.white)),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 20.0,
-                ),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_travelCostController.text.isEmpty) {
-                        setToastMessage(context, MyConstants.travelCostError);
-                      } else if(encImageBase64 == null) {
-                        setToastMessage(context, MyConstants.attachmentImageError);
-                      } else {
-                        Navigator.of(context).pop();
-                        callTravelPlanTransportBill();
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0)), backgroundColor: Color(int.parse("0xfff" "3eccbb")),
-                        minimumSize: const Size(140, 35)),
-                    child: const Text(MyConstants.submitButton,
-                        style: TextStyle(fontSize: 15, color: Colors.white)),
-                  ),
-                )
-              ]))
-        ]),
-      );
-    });
+                      )
+                    ]))
+              ]),
+            ),
+          );
+        });
   }
 
   Widget imageBottomSheet(BuildContext context, StateSetter myState) {
-    return SizedBox(
+    return Container(
       height: 120,
       child: Column(children: [
         Container(
@@ -1440,7 +1419,7 @@ class _MapViewState extends State<MapView> {
                         ))
                   ],
                 ))),
-        SizedBox(
+        Container(
           height: 65,
           child: Row(
             children: <Widget>[
@@ -1521,9 +1500,11 @@ class _MapViewState extends State<MapView> {
               await getDirectory!.create(recursive: true);
               capturedImage =
               await image!.copy('${getDirectory!.path}/${timestamp()}.png');
+              print(capturedImage!.path);
             } else {
               capturedImage =
               await image!.copy('${getDirectory!.path}/${timestamp()}.png');
+              print(capturedImage!.path);
             }
           });
         }
@@ -1575,13 +1556,13 @@ class _MapViewState extends State<MapView> {
       //setToastMessageLoading(context);
 
       final database =
-          await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
+      await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
       final ticketForTheDayDao = database.ticketForTheDayDao;
 
       Map<String, dynamic> endTravelData = {
         'ticket_id': widget.ticketId,
         'technician_code':
-            PreferenceUtils.getString(MyConstants.technicianCode),
+        PreferenceUtils.getString(MyConstants.technicianCode),
         'reached_customer_location': _destinationAddress,
         'dest_lat': widget.destinationLatitude,
         'dest_long': widget.destinationLongitude
@@ -1604,7 +1585,7 @@ class _MapViewState extends State<MapView> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          AMCTicketDetails(ticketId: widget.ticketId)));
+                      AMCTicketDetails(ticketId: widget.ticketId)));
             } else if (widget.screenType == MyConstants.startTicketType) {
               Navigator.pushReplacement(
                   context,
@@ -1677,6 +1658,7 @@ class _MapViewState extends State<MapView> {
               }
             }
           } catch (e) {
+            print(e);
           }
           setState(() {
             PreferenceUtils.setString(
@@ -1757,98 +1739,102 @@ class _MapViewState extends State<MapView> {
           builder: (context) {
             return _showLocationAlert == true
                 ? AlertDialog(
-                    contentPadding: EdgeInsets.zero,
-                    content: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text(
-                                  'Turn on your location settings in ${MyConstants.appTittle}')),
-                          const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text('1. Select Location')),
-                          const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text('2. Tap Alyways or While Using')),
-                          const SizedBox(
-                            height: 15.0,
-                          ),
-                          Align(
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 15.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    openAppSettings();
-                                    setState(() {
-                                      _showLocationAlert = false;
-                                      _showDoneAlert = true;
-                                    });
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                    showAlert(context);
-                                  },
-                                  child: Text(
-                                    MyConstants.settingsButton,
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        color: Color(
-                                            int.parse("0xfff" "507a7d"))),
-                                  ),
+                contentPadding: EdgeInsets.zero,
+                content: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text(
+                                'Turn on your location settings in ${MyConstants.appTittle}')),
+                        const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text('1. Select Location')),
+                        const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text('2. Tap Alyways or While Using')),
+                        const SizedBox(
+                          height: 15.0,
+                        ),
+                        Align(
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  openAppSettings();
+                                  setState(() {
+                                    _showLocationAlert = false;
+                                    _showDoneAlert = true;
+                                  });
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  showAlert(context);
+                                },
+                                child: Text(
+                                  MyConstants.settingsButton,
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: Color(
+                                          int.parse("0xfff" "507a7d"))),
                                 ),
-                              )),
-                          const SizedBox(
-                            height: 10.0,
-                          )
-                        ],
-                      ),
-                    ))
+                              ),
+                            )),
+                        const SizedBox(
+                          height: 10.0,
+                        )
+                      ],
+                    ),
+                  ),
+                ))
                 : AlertDialog(
-                    contentPadding: EdgeInsets.zero,
-                    content: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          const Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Text('Location services are enabled')),
-                          const SizedBox(
-                            height: 15.0,
-                          ),
-                          Align(
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 15.0),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    _getCurrentLocation(context);
-                                    setState(() {
-                                      _showDoneAlert = false;
-                                    });
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                  },
-                                  child: Text(
-                                    MyConstants.okButton,
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        color: Color(
-                                            int.parse("0xfff" "507a7d"))),
-                                  ),
+                contentPadding: EdgeInsets.zero,
+                content: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Text('Location services are enabled')),
+                        const SizedBox(
+                          height: 15.0,
+                        ),
+                        Align(
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 15.0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _getCurrentLocation(context);
+                                  setState(() {
+                                    _showDoneAlert = false;
+                                  });
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                },
+                                child: Text(
+                                  MyConstants.okButton,
+                                  style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: Color(
+                                          int.parse("0xfff" "507a7d"))),
                                 ),
-                              )),
-                          const SizedBox(
-                            height: 10.0,
-                          )
-                        ],
-                      ),
-                    ));
+                              ),
+                            )),
+                        const SizedBox(
+                          height: 10.0,
+                        )
+                      ],
+                    ),
+                  ),
+                ));
           });
     }
   }

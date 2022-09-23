@@ -97,11 +97,11 @@ dependencies:
   in_app_update: ^3.0.0
   fluttertoast: ^8.0.9
   file_picker: ^5.0.1
-  device_info_plus: ^4.1.2
   firebase_core: ^1.20.1
   art_sweetalert: ^0.0.5
   rename: ^2.0.1
   change_app_package_name: ^1.1.0
+  open_filex: ^4.1.1
 
 dev_dependencies:
   flutter_test:

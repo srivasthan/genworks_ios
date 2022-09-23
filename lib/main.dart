@@ -48,6 +48,10 @@ Future<void> main() async {
       'High Importance Notifications', // title
       description: 'This channel is used for important notifications.',
       importance: Importance.high,
+      enableLights: true,
+      enableVibration: true,
+      playSound: true,
+      showBadge: true
     );
 
     await flutterLocalNotificationsPlugin!
@@ -115,6 +119,7 @@ class _SplashState extends State<Splash> {
                 channelDescription: groupChannelDescription,
                 importance: Importance.max,
                 priority: Priority.high,
+                styleInformation: BigTextStyleInformation(''),
                 groupKey: groupKey);
         const NotificationDetails firstNotificationPlatformSpecifics =
             NotificationDetails(android: firstNotificationAndroidSpecifics);
@@ -125,6 +130,7 @@ class _SplashState extends State<Splash> {
                 channelDescription: groupChannelDescription,
                 importance: Importance.max,
                 priority: Priority.high,
+                styleInformation: BigTextStyleInformation(''),
                 groupKey: groupKey);
         const NotificationDetails secondNotificationPlatformSpecifics =
             NotificationDetails(android: secondNotificationAndroidSpecifics);
@@ -135,13 +141,13 @@ class _SplashState extends State<Splash> {
           'Alex Faarborg  Check this out',
           'Jeff Chang    Launch Party'
         ];
-        const InboxStyleInformation inboxStyleInformation =
-            InboxStyleInformation(lines,
-                contentTitle: '2 messages', summaryText: 'janedoe@example.com');
+        // const InboxStyleInformation inboxStyleInformation =
+        //     InboxStyleInformation(lines,
+        //         contentTitle: '2 messages', summaryText: 'janedoe@example.com');
         const AndroidNotificationDetails androidPlatformChannelSpecifics =
             AndroidNotificationDetails(groupChannelId, groupChannelName,
                 channelDescription: groupChannelDescription,
-                styleInformation: inboxStyleInformation,
+                styleInformation: BigTextStyleInformation(''),
                 groupKey: groupKey,
                 setAsGroupSummary: true);
         const NotificationDetails platformChannelSpecifics =

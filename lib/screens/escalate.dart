@@ -870,12 +870,20 @@ class _EscalateState extends State<Escalate> {
       setToastMessage(context, MyConstants.suggestTechnicianLevelError);
       validate = false;
     } else if (_descriptionController.text.trim().isEmpty) {
-      setToastMessage(context, MyConstants.descriptionError);
       validate = false;
+      setToastMessage(context, MyConstants.descriptionError);
     } else if (_resolutionSummaryController.text.trim().isEmpty) {
+      validate = false;
+      setToastMessage(context, MyConstants.resolutionSummaryError);
+    } else if (_technicianList.length > 0 && _selectedTechnician == null) {
+      validate = false;
       setToastMessage(context, MyConstants.suggestTechnicianError);
+    }
+    else if (_sign.currentState?.points.length == 0) {
+      setToastMessage(context, MyConstants.signedError);
       validate = false;
     }
+
 
     return validate;
   }

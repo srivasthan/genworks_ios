@@ -2,17 +2,20 @@ class AddTransferEntity {
   String? responseCode;
   String? token;
   String? message;
+  String? mesage;
 
   AddTransferEntity({
     this.responseCode,
     this.token,
     this.message,
+    this.mesage
   });
 
   AddTransferEntity.fromJson(Map<String, dynamic> json) {
     responseCode = json["response_code"]?.toString();
     token = json["token"]?.toString();
     message = json["message"]?.toString();
+    mesage = json["mesage"]?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -20,6 +23,7 @@ class AddTransferEntity {
     data["response_code"] = responseCode;
     data["token"] = token;
     data["message"] = message;
+    data["mesage"] = mesage;
     return data;
   }
 }

@@ -5,9 +5,9 @@ import 'package:fieldpro_genworks_healthcare/screens/show_video.dart';
 import 'package:fieldpro_genworks_healthcare/screens/training.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../open_file/src/plaform/open_file.dart';
 import '../utility/shared_preferences.dart';
 import '../utility/store_strings.dart';
 import '../utility/validator.dart';
@@ -360,7 +360,7 @@ class _TrainingDetailState extends State<TrainingDetail> {
 
         Navigator.of(context, rootNavigator: true).pop();
 
-        OpenFile.open(urlFile.path);
+        OpenFilex.open(urlFile.path);
       } catch (e) {
         throw Exception("Error opening url file");
       }

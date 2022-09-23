@@ -62,83 +62,93 @@ class _InstallationReportCompleteState
           await ticketForTheDayDao.findTicketForTheDayByTicketId(
               PreferenceUtils.getString(MyConstants.ticketIdStore));
 
-      ApiService apiService = ApiService(dio.Dio());
-      final response = await apiService.serviceCategory(
-          PreferenceUtils.getString(MyConstants.token),
-          PreferenceUtils.getString(MyConstants.technicianCode),
-          ticketForTheDayData[0].serviceId.toString());
-
-      if (response.installationCompleteEntity!.responseCode ==
-          MyConstants.response200) {
-        installationReportDataDao.deleteTicketForTheDayTable();
-        setState(() {
-          PreferenceUtils.setString(
-              MyConstants.token, response.installationCompleteEntity!.token!);
-          for (int i = 0;
-              i < response.installationCompleteEntity!.data!.length;
-              i++) {
-            _installationCompleteList.add(InstallationCompleteModel(
-                serCheckListId: response
-                    .installationCompleteEntity!.data![i]!.serCheckListId,
-                serviceGroup:
-                    response.installationCompleteEntity!.data![i]!.serviceGroup,
-                description:
-                    response.installationCompleteEntity!.data![i]!.description,
-                quationType: response
-                    .installationCompleteEntity!.data![i]!.quationType));
-
-            InstallationReportDataTable installationReportDataTable =
-                InstallationReportDataTable(
-                    i + 1,
-                    response.installationCompleteEntity!.data![i]!
-                            .serCheckListId ??
-                        0,
-                    response.installationCompleteEntity!.data![i]!
-                            .serviceGroup ??
-                        "",
-                    response.installationCompleteEntity!.data![i]!
-                            .description ??
-                        "",
-                    response.installationCompleteEntity!.data![i]!
-                            .quationType ??
-                        0,
-                    ticketForTheDayData[0].serviceId.toString(),
-                    "",
-                    "",
-                    false,
-                    false);
-            installationReportDataDao
-                .insertInstallationReportData(installationReportDataTable);
-          }
-
-          oninstallationreport(false, false);
-        });
-      } else if (response.installationCompleteEntity!.responseCode ==
-          MyConstants.response400) {
-        setState(() {
-          PreferenceUtils.setString(
-              MyConstants.token, response.installationCompleteEntity!.token!);
-          _isLoading = !_isLoading;
-          _noDataAvailable = true;
-          if (response.installationCompleteEntity!.message != null)
-            setToastMessage(
-                context, response.installationCompleteEntity!.message!);
-          else
-            setToastMessage(context, MyConstants.noDataAvailable);
-          commonIntentMethod(ticketForTheDayDao, ticketForDayData[0].ticketId);
-        });
-      } else if (response.installationCompleteEntity!.responseCode ==
-          MyConstants.response500) {
+      if (PreferenceUtils.getBool(PreferenceUtils.getString(MyConstants.ticketIdStore)) == true) {
         setState(() {
           _isLoading = !_isLoading;
           _noDataAvailable = true;
-          if (response.installationCompleteEntity!.message != null)
-            setToastMessage(
-                context, response.installationCompleteEntity!.message!);
-          else
-            setToastMessage(context, MyConstants.tokenError);
           commonIntentMethod(ticketForTheDayDao, ticketForDayData[0].ticketId);
         });
+      } else {
+        ApiService apiService = ApiService(dio.Dio());
+        final response = await apiService.serviceCategory(
+            PreferenceUtils.getString(MyConstants.token),
+            PreferenceUtils.getString(MyConstants.technicianCode),
+            ticketForTheDayData[0].serviceId.toString());
+
+        if (response.installationCompleteEntity!.responseCode ==
+            MyConstants.response200) {
+          installationReportDataDao.deleteTicketForTheDayTable();
+          setState(() {
+            PreferenceUtils.setString(
+                MyConstants.token, response.installationCompleteEntity!.token!);
+            for (int i = 0;
+            i < response.installationCompleteEntity!.data!.length;
+            i++) {
+              _installationCompleteList.add(InstallationCompleteModel(
+                  serCheckListId: response
+                      .installationCompleteEntity!.data![i]!.serCheckListId,
+                  serviceGroup:
+                  response.installationCompleteEntity!.data![i]!.serviceGroup,
+                  description:
+                  response.installationCompleteEntity!.data![i]!.description,
+                  quationType: response
+                      .installationCompleteEntity!.data![i]!.quationType));
+
+              InstallationReportDataTable installationReportDataTable =
+              InstallationReportDataTable(
+                  i + 1,
+                  response.installationCompleteEntity!.data![i]!
+                      .serCheckListId ??
+                      0,
+                  response.installationCompleteEntity!.data![i]!
+                      .serviceGroup ??
+                      "",
+                  response.installationCompleteEntity!.data![i]!
+                      .description ??
+                      "",
+                  response.installationCompleteEntity!.data![i]!
+                      .quationType ??
+                      0,
+                  ticketForTheDayData[0].serviceId.toString(),
+                  "",
+                  "",
+                  false,
+                  false);
+              installationReportDataDao
+                  .insertInstallationReportData(installationReportDataTable);
+            }
+
+            oninstallationreport(false, false);
+          });
+        } else if (response.installationCompleteEntity!.responseCode ==
+            MyConstants.response400) {
+          setState(() {
+            PreferenceUtils.setString(
+                MyConstants.token, response.installationCompleteEntity!.token!);
+            _isLoading = !_isLoading;
+            _noDataAvailable = true;
+            if (response.installationCompleteEntity!.message != null)
+              setToastMessage(
+                  context, response.installationCompleteEntity!.message!);
+            else
+              setToastMessage(context, MyConstants.noDataAvailable);
+            commonIntentMethod(
+                ticketForTheDayDao, ticketForDayData[0].ticketId);
+          });
+        } else if (response.installationCompleteEntity!.responseCode ==
+            MyConstants.response500) {
+          setState(() {
+            _isLoading = !_isLoading;
+            _noDataAvailable = true;
+            if (response.installationCompleteEntity!.message != null)
+              setToastMessage(
+                  context, response.installationCompleteEntity!.message!);
+            else
+              setToastMessage(context, MyConstants.tokenError);
+            commonIntentMethod(
+                ticketForTheDayDao, ticketForDayData[0].ticketId);
+          });
+        }
       }
     } else {
       setToastMessage(context, MyConstants.internetConnection);
@@ -318,6 +328,7 @@ class _InstallationReportCompleteState
                                 Column(children: [
                                   TextFormField(
                                     controller: _workTypeController,
+                                    enabled: false,
                                     decoration: const InputDecoration(
                                         labelText: MyConstants.workType,
                                         contentPadding:
@@ -327,6 +338,7 @@ class _InstallationReportCompleteState
                                   const SizedBox(height: 10.0),
                                   TextFormField(
                                     controller: _descriptionController,
+                                    enabled: false,
                                     decoration: const InputDecoration(
                                         labelText: MyConstants.description,
                                         contentPadding:
@@ -670,6 +682,7 @@ class _InstallationReportCompleteState
           Navigator.of(context, rootNavigator: true).pop();
           PreferenceUtils.setString(
               MyConstants.token, response.addTransferEntity!.token!);
+          PreferenceUtils.setBool(ticketForDayData[0].ticketId, true);
           setToastMessage(context, response.addTransferEntity!.message!);
           installationReportDataDao.deleteTicketForTheDayTable();
           commonIntentMethod(ticketForTheDayDao, ticketForDayData[0].ticketId);

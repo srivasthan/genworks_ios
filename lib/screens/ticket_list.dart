@@ -132,6 +132,8 @@ class _TicketListState extends State<TicketList> {
       _ticketForTheDayButtonClicked = false;
       _newTicketButtonClicked = true;
       _hideFloatingButton = false;
+      val = -1;
+      _rejectReason.text = MyConstants.empty;
       _noDataAvailable = false;
       if (_ongoingTicketListEmpty == true) {
         _ongoingTicketListEmpty = !_ongoingTicketListEmpty;
@@ -839,7 +841,7 @@ class _TicketListState extends State<TicketList> {
 
   videoPicker(int index, BuildContext context) async {
     if (newTicketList[index].video == MyConstants.na) {
-      setToastMessage(context, MyConstants.videoError);
+      setToastMessage(context, MyConstants.noVideo);
     } else {
       if (newTicketList[index].video != MyConstants.na &&
           newTicketList[index].video!.isNotEmpty &&

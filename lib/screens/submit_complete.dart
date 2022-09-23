@@ -12,6 +12,7 @@ import 'package:flutter_signature_pad/flutter_signature_pad.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:number_to_words/number_to_words.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
@@ -23,7 +24,6 @@ import 'package:device_info/device_info.dart';
 import '../network/api_services.dart';
 import '../network/db/app_database.dart';
 import '../network/model/impreset_model.dart';
-import '../open_file/src/plaform/open_file.dart';
 import '../utility/shared_preferences.dart';
 import '../utility/store_strings.dart';
 import '../utility/validator.dart';
@@ -1441,7 +1441,7 @@ class _SubmitCompleteState extends State<SubmitComplete> {
                                                         DocumentViewer(
                                                             _selectedDocument)));
                                           } else {
-                                            OpenFile.open(
+                                            OpenFilex.open(
                                                 _selectedDocument!.path);
                                           }
                                         } else {

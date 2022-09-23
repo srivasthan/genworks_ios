@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
@@ -20,7 +21,6 @@ import '../network/db/app_database.dart';
 import '../network/db/travel_update_request_data.dart';
 import '../network/model/submitted_claim.dart';
 import '../network/model/travel_update_model.dart';
-import '../open_file/src/plaform/open_file.dart';
 import '../utility/shared_preferences.dart';
 import '../utility/store_strings.dart';
 import '../utility/technician_punch.dart';
@@ -807,7 +807,7 @@ class _ReimbursementState extends State<Reimbursement> {
               FocusScope.of(context).requestFocus(FocusNode());
               PreferenceUtils.setString(
                   MyConstants.token, response.addTransferEntity!.token!);
-              setToastMessage(context, response.addTransferEntity!.message!);
+              setToastMessage(context, response.addTransferEntity!.mesage!);
 
               Future.delayed(const Duration(seconds: 2), () {
                 getTravelUpdateList();
@@ -819,12 +819,12 @@ class _ReimbursementState extends State<Reimbursement> {
               Navigator.of(context, rootNavigator: true).pop();
               PreferenceUtils.setString(
                   MyConstants.token, response.addTransferEntity!.token!);
-              setToastMessage(context, response.addTransferEntity!.message!);
+              setToastMessage(context, response.addTransferEntity!.mesage!);
             });
           } else if (response.addTransferEntity!.responseCode ==
               MyConstants.response500) {
             Navigator.of(context, rootNavigator: true).pop();
-            setToastMessage(context, response.addTransferEntity!.message!);
+            setToastMessage(context, response.addTransferEntity!.mesage!);
           }
         } else {
           Navigator.of(context, rootNavigator: true).pop();
@@ -1681,7 +1681,7 @@ class _ReimbursementState extends State<Reimbursement> {
                         await FlutterHtmlToPdf.convertFromHtmlContent(
                             downloadedPdf!, appDocDir.path, timestamp());
                     Navigator.of(context, rootNavigator: true).pop();
-                    OpenFile.open(generatedPdfFile.path);
+                    OpenFilex.open(generatedPdfFile.path);
                   } else {
                     fileDirectory.createFolder().then((value) async {
                       getDirectory = value;
@@ -1695,7 +1695,7 @@ class _ReimbursementState extends State<Reimbursement> {
                               getDirectory!.path,
                               timestamp());
                       Navigator.of(context, rootNavigator: true).pop();
-                      OpenFile.open(generatedPdfFile.path);
+                      OpenFilex.open(generatedPdfFile.path);
                     });
                   }
                 } else if (Platform.isIOS) {
@@ -1711,7 +1711,7 @@ class _ReimbursementState extends State<Reimbursement> {
                             directory.path,
                             timestamp());
                     Navigator.of(context, rootNavigator: true).pop();
-                    OpenFile.open(generatedPdfFile.path);
+                    OpenFilex.open(generatedPdfFile.path);
                   } else if (status == PermissionStatus.denied) {
                     saveAsPDF();
                   } else if (status == PermissionStatus.permanentlyDenied) {

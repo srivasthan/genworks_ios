@@ -29,10 +29,11 @@ final List<Widget> _pages = <Widget>[
     constraints: const BoxConstraints.expand(),
     child: GridView.count(
         crossAxisCount: 3,
-        childAspectRatio: 2 / 1,
+        childAspectRatio: 4 / 3,
+        shrinkWrap: true,
         children: List.generate(choices.length, (index) {
           return Padding(
-            padding: const EdgeInsets.only(top: 5),
+            padding: EdgeInsets.only(top: 10),
             child: Center(
               child: ChoiceCard(choice: choices[index]),
             ),
@@ -43,15 +44,15 @@ final List<Widget> _pages = <Widget>[
       constraints: const BoxConstraints.expand(),
       child: GridView.count(
           crossAxisCount: 3,
-          childAspectRatio: 2 / 1,
+          childAspectRatio: 4 / 3,
           children: List.generate(choices1.length, (index) {
             return Padding(
-              padding: const EdgeInsets.only(top: 5),
+              padding: EdgeInsets.only(top: 5),
               child: Center(
                 child: ChoiceCard(choice: choices1[index]),
               ),
             );
-          }))),
+          })))
 ];
 
 Future<void> technicianPunchIn(
@@ -222,7 +223,7 @@ void dashBoardBottomSheet(BuildContext context, bool ratingStatus) {
         return StatefulBuilder(
             builder: (BuildContext context, StateSetter myState) {
               return Container(
-                height: 300,
+                height: 350,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage("assets/images/menu_bg_drawable.png"),
@@ -321,7 +322,7 @@ void dashBoardBottomSheet(BuildContext context, bool ratingStatus) {
                       ),
                     ),
                     SizedBox(
-                      height: 200,
+                      height: 250,
                       child: IconTheme(
                         data: IconThemeData(color: _kArrowColor),
                         child: Stack(

@@ -47,7 +47,7 @@ class _SpareListenerState extends State<SpareListener> {
         context,
         MaterialPageRoute(
             builder: (context) =>
-            SpareCart(widget.status!, widget.ticketId!)));
+            SpareCart(widget.status!, widget.ticketId ?? MyConstants.wareHouseId)));
   }
 
   @override
@@ -69,7 +69,7 @@ class _SpareListenerState extends State<SpareListener> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              SpareCart(widget.status!, widget.ticketId!)));
+                              SpareCart(widget.status!, widget.ticketId ?? MyConstants.wareHouseId)));
                 },
                 icon: const Icon(Icons.arrow_back_ios_outlined)),
           ),

@@ -929,11 +929,10 @@ class _WorkInProgressState extends State<WorkInProgress> {
     } else if (_resolutionSummaryController.text.isEmpty) {
       setToastMessage(context, MyConstants.resolutionSummaryError);
       validate = false;
+    } else if (_sign.currentState?.points.length == 0) {
+      setToastMessage(context, MyConstants.signedError);
+      validate = false;
     }
-    // else if (signatureImage == null) {
-    //   setToastMessage(context, MyConstants.signedError);
-    //   validate = false;
-    // }
     return validate;
   }
 

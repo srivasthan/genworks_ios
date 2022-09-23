@@ -230,6 +230,7 @@ class _LoginState extends State<Login> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage("assets/images/loginscreen_backgrd.png"),
+                      fit: BoxFit.fill
                     ),
                   ),
                   child: Container(
@@ -308,8 +309,9 @@ class _LoginState extends State<Login> {
                                 GestureDetector(
                                   onTap: () {
                                     if (formKey.currentState!.validate()) {
-                                      checkForUpdate(
-                                          MyConstants.loginClick);
+                                      doLogin(context);
+                                      // checkForUpdate(
+                                      //     MyConstants.loginClick);
                                     }else {setToastMessage(context, MyConstants.emptyForm);
                                     }
                                   },

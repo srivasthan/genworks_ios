@@ -99,8 +99,6 @@ class _SpareCartState extends State<SpareCart> {
       //clear the list
       spareCartList.clear();
 
-      print(spareId);
-
       ApiService apiService = ApiService(dio.Dio());
       final response = await apiService.getSpareCart(
           getToken,
@@ -180,7 +178,7 @@ class _SpareCartState extends State<SpareCart> {
     }
   }
 
-  void getConsumedSpareData(int index) async {
+  void getConsumedSpareData(int index, String source) async {
     final database =
         await $FloorAppDatabase.databaseBuilder('floor_database.db').build();
     final spareRequestDataDao = database.spareRequestDataDao;
@@ -189,8 +187,13 @@ class _SpareCartState extends State<SpareCart> {
     setState(() {
       if (spareRequestData[index].upDateSpare == true) {
         _cartIncrement--;
-        spareRequestDataDao.updateConsumedSpare(
-            false, spareRequestData[index].spareId);
+        if(source == MyConstants.api) {
+          spareRequestDataDao.updateConsumedSpare(
+              false, spareCartList[index].spareId.toString());
+        } else if(source == MyConstants.searchedSpare) {
+          spareRequestDataDao.updateConsumedSpare(
+              false, filteredList[index].spareId.toString());
+        }
         _addToCart = MyConstants.addToCartButton +
             MyConstants.openBracket +
             _cartIncrement.toString() +
@@ -199,8 +202,13 @@ class _SpareCartState extends State<SpareCart> {
       }
       else {
         _cartIncrement++;
-        spareRequestDataDao.updateConsumedSpare(
-            true, spareRequestData[index].spareId);
+        if(source == MyConstants.api) {
+          spareRequestDataDao.updateConsumedSpare(
+              true, spareCartList[index].spareId.toString());
+        } else if(source == MyConstants.searchedSpare) {
+          spareRequestDataDao.updateConsumedSpare(
+              true, filteredList[index].spareId.toString());
+        }
         _addToCart = MyConstants.addToCartButton +
             MyConstants.openBracket +
             _cartIncrement.toString() +
@@ -221,7 +229,7 @@ class _SpareCartState extends State<SpareCart> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  SpareListener(widget.ticketUpdate, widget.ticketId)));
+                  SpareListener(widget.ticketUpdate, widget.ticketId ?? MyConstants.wareHouseId)));
     } else {
       setToastMessage(context, MyConstants.selectSpare);
     }
@@ -648,7 +656,7 @@ class _SpareCartState extends State<SpareCart> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            getConsumedSpareData(index);
+                            getConsumedSpareData(index, MyConstants.api);
                           });
                         },
                         child: Container(
@@ -758,7 +766,7 @@ class _SpareCartState extends State<SpareCart> {
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    getConsumedSpareData(index);
+                    getConsumedSpareData(index, MyConstants.searchedSpare);
                   });
                 },
                 child: Container(

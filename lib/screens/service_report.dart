@@ -5,13 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html_to_pdf/flutter_html_to_pdf.dart';
 
-import '../open_file/src/plaform/open_file.dart';
 import '../utility/shared_preferences.dart';
 import '../utility/store_strings.dart';
 import '../utility/technician_punch.dart';
@@ -714,7 +714,7 @@ class _ServiceReportState extends State<ServiceReport> {
           };
 
           final Response<String> result = await Dio().request(
-              'https://dev.kaspontech.com/djadmin_qa/servicereport_web_view/',
+              'https://genworks.kaspontech.com/djadmin_qa/servicereport_web_view/',
               options: Options(
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},
@@ -757,7 +757,7 @@ class _ServiceReportState extends State<ServiceReport> {
                         await FlutterHtmlToPdf.convertFromHtmlContent(
                             downloadedPdf!, appDocDir.path, timestamp());
                     Navigator.of(context, rootNavigator: true).pop();
-                    OpenFile.open(generatedPdfFile.path);
+                    OpenFilex.open(generatedPdfFile.path);
                   } else {
                     fileDirectory.createFolder().then((value) async {
                       getDirectory = value;
@@ -771,7 +771,7 @@ class _ServiceReportState extends State<ServiceReport> {
                               getDirectory!.path,
                               timestamp());
                       Navigator.of(context, rootNavigator: true).pop();
-                      OpenFile.open(generatedPdfFile.path);
+                      OpenFilex.open(generatedPdfFile.path);
                     });
                   }
                 } else if (Platform.isIOS) {
@@ -787,7 +787,7 @@ class _ServiceReportState extends State<ServiceReport> {
                             directory.path,
                             timestamp());
                     Navigator.of(context, rootNavigator: true).pop();
-                    OpenFile.open(generatedPdfFile.path);
+                    OpenFilex.open(generatedPdfFile.path);
                   } else if (status == PermissionStatus.denied) {
                     saveAsPDF();
                   } else if (status == PermissionStatus.permanentlyDenied) {

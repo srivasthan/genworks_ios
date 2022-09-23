@@ -11,10 +11,12 @@ class MyConstants {
   static const String nameCapital = "Name";
   static const String cusName = "Name";
   static const String cusMobile = "Mobile";
+  static const String amcHints = "Amc Contracts";
   static const String mobileCapital = "Mobile No";
   static const String address = "Address";
   static const String appName = "FieldPro Service";
   static const String training = "Training";
+  static const String installationStatus = "installation_status";
   static const String smartScheduling = "Smart Scheduling";
   static const String noPlanning = "No Planning Schedule Data";
   static const String assessment = "Assessment";
@@ -229,8 +231,11 @@ class MyConstants {
   static const String attachment = "Attachment           :";
   static const String video = "Video                      :";
   static const String suggestionLevel = "Suggestion Level  :";
+  static const String suggestionLevelHint = "Suggestion Level";
   static const String suggestionTechnicianName =
       "Suggestion Engineer Name  :";
+  static const String suggestionTechnicianNameHint =
+      "Suggestion Engineer Name";
   static const String attachmentString = "Attachment";
   static const String l1 = "L1";
   static const String l2 = "L2";
@@ -477,6 +482,8 @@ class MyConstants {
   static const String spareCartList = "SpareCartList";
   static const String all = "All";
   static const String mapKey = "map_key";
+  static const String api = "api";
+  static const String searchedSpare = "searched_spare";
   static const String isSelectedOnHandSpare = "is_selected_on_hand_spare";
   static const String checkBoxError = "Select any value ";
   static const String answerError = "Please enter answer";
