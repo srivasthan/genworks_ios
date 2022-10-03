@@ -12,6 +12,7 @@ import 'dart:ui' as ui;
 import 'package:path/path.dart' as path;
 import 'package:dio/dio.dart' as dio;
 import 'package:video_compress/video_compress.dart';
+import 'package:light_compressor/light_compressor.dart' as lc;
 
 import '../network/api_services.dart';
 import '../network/model/suggested_technician_model.dart';
@@ -595,11 +596,16 @@ class _EscalateState extends State<Escalate> {
   }
 
   Future<void> captureVideo() async {
-    MediaInfo? info;
+    var info;
     var photo = await ImagePicker().pickVideo(
         preferredCameraDevice: CameraDevice.rear,
         source: ImageSource.camera,
-        maxDuration: const Duration(minutes: 1));
+        maxDuration: Duration(minutes: 1));
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    final FileDirectory fileDirectory =
+    new FileDirectory(context, MyConstants.imageFolder);
+    Directory? getDirectory;
 
     if (photo != null) {
       setState(() {
@@ -607,11 +613,6 @@ class _EscalateState extends State<Escalate> {
       });
 
       if (Platform.isAndroid) {
-        DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        final FileDirectory fileDirectory =
-        FileDirectory(context, MyConstants.imageFolder);
-        Directory? getDirectory;
 
         await _requestPermission(Permission.storage);
 
@@ -634,14 +635,13 @@ class _EscalateState extends State<Escalate> {
 
           setState(() {
             _showVideoTick = true;
-            FocusScope.of(context).requestFocus(FocusNode());
+            FocusScope.of(context).requestFocus(new FocusNode());
           });
         } else {
           fileDirectory.createFolder().then((value) async {
             getDirectory = value;
-            if (!await getDirectory!.exists()) {
+            if (!await getDirectory!.exists())
               await getDirectory!.create(recursive: true);
-            }
 
             showVideoDialog(context);
 
@@ -649,18 +649,33 @@ class _EscalateState extends State<Escalate> {
                 .copy('${getDirectory!.path}/${timestamp()}.mp4');
             _videoPath = _convertedVideo!.path;
 
-            info = await VideoCompress.compressVideo(
-              _videoPath!,
-              quality: VideoQuality.LowQuality,
-              deleteOrigin: false, // default(false)
-            );
+            File originalVideo = await File(photo.path).copy(_videoPath!);
 
-            _showVideo = await File(info!.path!).copy(_videoPath!);
-            Navigator.of(context, rootNavigator: true).pop();
+            lc.LightCompressor().compressVideo(
+                path: originalVideo.path,
+                destinationPath: '${getDirectory!.path}/${timestamp()}.mp4',
+                videoQuality: lc.VideoQuality.low,
+                isMinBitrateCheckEnabled: false,
+                frameRate: 24 /* or ignore it */).then((compressor) async {
 
-            setState(() {
-              _showVideoTick = true;
-              FocusScope.of(context).requestFocus(FocusNode());
+              if (compressor is lc.OnSuccess) {
+                _showVideo = await File(compressor.destinationPath).copy(_videoPath!);
+
+                PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+
+                setState(() {
+                  _showVideoTick = true;
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                });
+              } else if (compressor is lc.OnFailure) {
+                // failure message
+                print(compressor.message);
+
+              } else if (compressor is lc.OnCancelled) {
+                print(compressor.isCancelled);
+              }
+
+              Navigator.of(context, rootNavigator: true).pop();
             });
           });
         }
@@ -685,12 +700,15 @@ class _EscalateState extends State<Escalate> {
 
           setState(() {
             _showVideoTick = true;
-            FocusScope.of(context).requestFocus(FocusNode());
+            FocusScope.of(context).requestFocus(new FocusNode());
           });
         }
       }
 
-      PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+      if((Platform.isAndroid && androidInfo.version.sdkInt >=
+          int.parse(MyConstants.osVersion)) || Platform.isIOS) {
+        PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+      }
     } else {
       setToastMessage(context, MyConstants.videoError);
     }

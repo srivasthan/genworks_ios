@@ -202,7 +202,7 @@ class _OnHandSpareState extends State<OnHandSpare> {
               false, onHandPrimarySpareList[index].spareId.toString());
         } else if(source == MyConstants.searchedSpare) {
           consumedSpareRequestDataDao.updateConsumedSpare(
-              false, onHandPrimarySpareList[index].spareId.toString());
+              false, consumedSpareRequestDataList[index].spareId.toString());
         }
         _cart = MyConstants.addToCartButton +
             MyConstants.openBracket +
@@ -214,7 +214,7 @@ class _OnHandSpareState extends State<OnHandSpare> {
         _cartIncrement++;
         if(source == MyConstants.api) {
           consumedSpareRequestDataDao.updateConsumedSpare(
-              true, consumedSpareRequestDataList[index].spareId.toString());
+              true, onHandPrimarySpareList[index].spareId.toString());
         } else if(source == MyConstants.searchedSpare) {
           consumedSpareRequestDataDao.updateConsumedSpare(
               true, consumedSpareRequestDataList[index].spareId.toString());

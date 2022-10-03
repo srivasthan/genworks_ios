@@ -134,6 +134,7 @@ class _TicketListState extends State<TicketList> {
       _hideFloatingButton = false;
       val = -1;
       _rejectReason.text = MyConstants.empty;
+      _rejectFormFieldVisible = false;
       _noDataAvailable = false;
       if (_ongoingTicketListEmpty == true) {
         _ongoingTicketListEmpty = !_ongoingTicketListEmpty;
@@ -4816,167 +4817,169 @@ class _TicketListState extends State<TicketList> {
   Widget showRejectBottomSheet(String ticketId) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter myState) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: Color(int.parse("0xfff" "5C7E7F")),
-                      borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(10.0),
-                          bottomRight: Radius.circular(10.0))),
-                  child: Padding(
-                      padding: const EdgeInsets.only(left: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          const Text(
-                            "Reject Ticket",
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          IconButton(
-                              onPressed: () {
-                                _controller.close();
-                                setState(() => _hideFloatingButton = false);
-                              },
-                              icon: const Icon(
-                                Icons.clear,
-                                color: Colors.white,
-                              ))
-                        ],
-                      ))),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ListTile(
-                    title: Row(children: [
-                      Radio(
-                        value: 1,
-                        groupValue: val,
-                        onChanged: (value) {
-                          myState(() {
-                            val = value;
-                            _rejectFormFieldVisible = false;
-                            _rejectReasonString = "Busy with Assigned Call";
-                          });
-                        },
-                        activeColor: Color(int.parse("0xfff" "3eccbb")),
-                      ),
-                      const Text("Busy with Assigned Call")
-                    ]),
-                  ),
-                  ListTile(
-                      title: Row(
-                        children: [
-                          Radio(
-                            value: 2,
-                            groupValue: val,
-                            onChanged: (value) {
-                              myState(() {
-                                val = value;
-                                _rejectFormFieldVisible = false;
-                                _rejectReasonString = "End of Business day";
-                              });
-                            },
-                            activeColor: Color(int.parse("0xfff" "3eccbb")),
-                          ),
-                          const Text("End of Business day")
-                        ],
-                      )),
-                  ListTile(
-                      title: Row(
-                        children: [
-                          Radio(
-                            value: 3,
-                            groupValue: val,
-                            onChanged: (value) {
-                              myState(() {
-                                val = value;
-                                _rejectFormFieldVisible = false;
-                                _rejectReasonString = "Long Distance";
-                              });
-                            },
-                            activeColor: Color(int.parse("0xfff" "3eccbb")),
-                          ),
-                          const Text("Long Distance")
-                        ],
-                      )),
-                  ListTile(
-                    title: Row(children: [
-                      Radio(
-                        value: 4,
-                        groupValue: val,
-                        onChanged: (value) {
-                          myState(() {
-                            val = value;
-                            _rejectReason.value = TextEditingValue.empty;
-                            _rejectFormFieldVisible = true;
-                            _rejectReasonString = "Others";
-                          });
-                        },
-                        activeColor: Color(int.parse("0xfff" "3eccbb")),
-                      ),
-                      const Text("Others")
-                    ]),
-                  )
-                ],
-              ),
-              Visibility(
-                visible: _rejectFormFieldVisible,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        top: 20.0, right: 20.0, left: 20.0),
-                    child: Form(
-                      key: formKey,
-                      child: TextFormField(
-                        keyboardType: TextInputType.text,
-                        controller: _rejectReason,
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        decoration: const InputDecoration(
-                          labelText: 'Enter Reason',
-                          contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          border: OutlineInputBorder(),
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: Color(int.parse("0xfff" "5C7E7F")),
+                        borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(10.0),
+                            bottomRight: Radius.circular(10.0))),
+                    child: Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            const Text(
+                              "Reject Ticket",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  _controller.close();
+                                  setState(() => _hideFloatingButton = false);
+                                },
+                                icon: const Icon(
+                                  Icons.clear,
+                                  color: Colors.white,
+                                ))
+                          ],
+                        ))),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      title: Row(children: [
+                        Radio(
+                          value: 1,
+                          groupValue: val,
+                          onChanged: (value) {
+                            myState(() {
+                              val = value;
+                              _rejectFormFieldVisible = false;
+                              _rejectReasonString = "Busy with Assigned Call";
+                            });
+                          },
+                          activeColor: Color(int.parse("0xfff" "3eccbb")),
                         ),
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Please enter reason";
-                          }
-                          return null;
-                        },
+                        const Text("Busy with Assigned Call")
+                      ]),
+                    ),
+                    ListTile(
+                        title: Row(
+                          children: [
+                            Radio(
+                              value: 2,
+                              groupValue: val,
+                              onChanged: (value) {
+                                myState(() {
+                                  val = value;
+                                  _rejectFormFieldVisible = false;
+                                  _rejectReasonString = "End of Business day";
+                                });
+                              },
+                              activeColor: Color(int.parse("0xfff" "3eccbb")),
+                            ),
+                            const Text("End of Business day")
+                          ],
+                        )),
+                    ListTile(
+                        title: Row(
+                          children: [
+                            Radio(
+                              value: 3,
+                              groupValue: val,
+                              onChanged: (value) {
+                                myState(() {
+                                  val = value;
+                                  _rejectFormFieldVisible = false;
+                                  _rejectReasonString = "Long Distance";
+                                });
+                              },
+                              activeColor: Color(int.parse("0xfff" "3eccbb")),
+                            ),
+                            const Text("Long Distance")
+                          ],
+                        )),
+                    ListTile(
+                      title: Row(children: [
+                        Radio(
+                          value: 4,
+                          groupValue: val,
+                          onChanged: (value) {
+                            myState(() {
+                              val = value;
+                              _rejectReason.value = TextEditingValue.empty;
+                              _rejectFormFieldVisible = true;
+                              _rejectReasonString = "Others";
+                            });
+                          },
+                          activeColor: Color(int.parse("0xfff" "3eccbb")),
+                        ),
+                        const Text("Others")
+                      ]),
+                    )
+                  ],
+                ),
+                Visibility(
+                  visible: _rejectFormFieldVisible,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 20.0, right: 20.0, left: 20.0),
+                      child: Form(
+                        key: formKey,
+                        child: TextFormField(
+                          keyboardType: TextInputType.text,
+                          controller: _rejectReason,
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Reason',
+                            contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return "Please enter reason";
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        top: 10, left: 10.0, right: 10.0),
-                    child: SizedBox(
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          rejectTechnicianTicket(context, ticketId);
-                        },
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    10.0)), backgroundColor: Color(int.parse("0xfff" "E63946"))),
-                        child: const Text('Reject',
-                            style: TextStyle(fontSize: 15, color: Colors
-                                .white)),
+                Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 10, left: 10.0, right: 10.0),
+                      child: SizedBox(
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            rejectTechnicianTicket(context, ticketId);
+                          },
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      10.0)), backgroundColor: Color(int.parse("0xfff" "E63946"))),
+                          child: const Text('Reject',
+                              style: TextStyle(fontSize: 15, color: Colors
+                                  .white)),
+                        ),
                       ),
-                    ),
-                  )),
-              const SizedBox(
-                height: 20.0,
-              )
-            ],
+                    )),
+                const SizedBox(
+                  height: 20.0,
+                )
+              ],
+            ),
           );
         }
     );

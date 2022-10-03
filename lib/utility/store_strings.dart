@@ -55,6 +55,7 @@ class MyConstants {
   static const String resolutionSummary = "Resolution Summary";
   static const String contractCategory = "Contract Category";
   static const String workType = "Work Type";
+  static const String serviceGroup = "Service Group";
   static const String amc = "Amc contract";
   static const String amcId = "Amc Id";
   static const String amcType = "amc";
@@ -419,6 +420,7 @@ class MyConstants {
   static const String problemDescriptionError =
       "Please enter your problem description";
   static const String problemDescription = "Problem description";
+  static const String enterProblemDescription = "Enter Problem description";
   static const String productError = "Please select product";
   static const String subProduct = "Sub Product";
   static const String subProductError = "Please select sub product";

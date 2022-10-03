@@ -102,6 +102,7 @@ dependencies:
   rename: ^2.0.1
   change_app_package_name: ^1.1.0
   open_filex: ^4.1.1
+  light_compressor: ^1.2.2
 
 dev_dependencies:
   flutter_test:

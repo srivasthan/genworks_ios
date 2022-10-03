@@ -78,6 +78,7 @@ class _MapViewState extends State<MapView> {
 
   late PolylinePoints polylinePoints;
   Map<PolylineId, Polyline> polyLines = {};
+  Set<Polyline> _directionPolyline = {};
   List<LatLng> polylineCoordinates = [];
 
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -308,14 +309,28 @@ class _MapViewState extends State<MapView> {
       });
     }
 
-    PolylineId id = const PolylineId('poly');
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.indigo,
-      points: polylineCoordinates,
-      width: 3,
+    Polyline polyLine = Polyline(
+      polylineId: const PolylineId('direction'),
+      color: Colors.blue,
+      points: List.empty(growable: true),
+      width: 5,
+      startCap: Cap.roundCap,
+      endCap: Cap.roundCap,
+      jointType: JointType.round,
+      geodesic: true,
     );
-    polyLines[id] = polyline;
+    polyLine.points.add(LatLng(startLatitude, startLongitude));
+    polyLine.points.add(LatLng(destinationLatitude, destinationLongitude));
+    _directionPolyline.add(polyLine);
+
+    // PolylineId id = const PolylineId('poly');
+    // Polyline polyline = Polyline(
+    //   polylineId: id,
+    //   color: Colors.indigo,
+    //   points: polylineCoordinates,
+    //   width: 3,
+    // );
+    // polyLines[id] = polyline;
   }
 
   Future<T?> pushPage<T>(BuildContext context) {
@@ -358,7 +373,8 @@ class _MapViewState extends State<MapView> {
                 zoomGesturesEnabled: true,
                 zoomControlsEnabled: false,
                 mapType: MapType.normal,
-                polylines: Set<Polyline>.of(polyLines.values),
+                minMaxZoomPreference: const MinMaxZoomPreference(5,10),
+                polylines: _directionPolyline,
                 onMapCreated: (GoogleMapController controller) async {
                   mapController = controller;
 
@@ -487,7 +503,7 @@ class _MapViewState extends State<MapView> {
                                     _currentPosition.latitude,
                                     _currentPosition.longitude,
                                   ),
-                                  zoom: 18.0,///value changed
+                                  zoom: 10.0,///value changed
                                 ),
                               ),
                             );
@@ -611,7 +627,7 @@ class _MapViewState extends State<MapView> {
                 ) : Container(),
               )
             ],
-          ),
+          )
         ),
       ),
     );
@@ -627,7 +643,7 @@ class _MapViewState extends State<MapView> {
               title: const Center(child: Text(MyConstants.chooseModeOfTransport)),
               content: Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Container(
+                child: SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -937,51 +953,123 @@ class _MapViewState extends State<MapView> {
           widget.destinationLongitude.toString());
 
       if (response.getDistanceEntity!.responseCode == MyConstants.response200) {
-        setState(() {
-          if (ticketForTheDayAccess[0].travelPlanTransport ==
-              MyConstants.cab ||
-              ticketForTheDayAccess[0].travelPlanTransport ==
-                  MyConstants.publicTransport) {
-            ArtSweetAlert.show(
-                context: context,
-                artDialogArgs: ArtDialogArgs(
-                    type: ArtSweetAlertType.warning,
-                    title: MyConstants.appTittle,
-                    text: MyConstants.updateTravel,
-                    showCancelBtn: true,
-                    confirmButtonText: MyConstants.nowButton,
-                    cancelButtonText: MyConstants.laterButton,
-                    onConfirm: () {
-                      setState(() {
+
+        if(response.getDistanceEntity!.flag == 0) {
+          setState(() {
+            if (ticketForTheDayAccess[0].travelPlanTransport ==
+                MyConstants.cab ||
+                ticketForTheDayAccess[0].travelPlanTransport ==
+                    MyConstants.publicTransport) {
+              ArtSweetAlert.show(
+                  context: context,
+                  artDialogArgs: ArtDialogArgs(
+                      type: ArtSweetAlertType.warning,
+                      title: MyConstants.appTittle,
+                      text: MyConstants.updateTravel,
+                      showCancelBtn: true,
+                      confirmButtonText: MyConstants.nowButton,
+                      cancelButtonText: MyConstants.laterButton,
+                      onConfirm: () {
+                        setState(() {
+                          Navigator.of(context, rootNavigator: true)
+                              .pop();
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return travelCostBottomSheet(
+                                    context,
+                                    _startAddress,
+                                    _destinationAddress,
+                                    _distance,
+                                    _time,
+                                    ticketForTheDayAccess[0]
+                                        .travelPlanTransport);
+                              });
+                        });
+                      },
+                      onCancel: () {
                         Navigator.of(context, rootNavigator: true)
                             .pop();
-                        showModalBottomSheet(
+                        endTravelPostApi(MyConstants.noButton);
+                      },
+                      cancelButtonColor:
+                      Color(int.parse("0xfff" + "C5C5C5")),
+                      confirmButtonColor:
+                      Color(int.parse("0xfff" + "507a7d"))));
+            } else {
+              endTravelPostApi(MyConstants.noButton);
+            }
+          });
+        }
+        else {
+          ArtSweetAlert.show(
+              context: context,
+              artDialogArgs: ArtDialogArgs(
+                  type: ArtSweetAlertType.warning,
+                  title: MyConstants.appTittle,
+                  text: response.getDistanceEntity!.message! +
+                      MyConstants.wantToContinue,
+                  showCancelBtn: true,
+                  confirmButtonText: MyConstants.yesButton,
+                  cancelButtonText: MyConstants.noButton,
+                  onConfirm: () {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    setState(() {
+                      if (ticketForTheDayAccess[0].travelPlanTransport ==
+                          MyConstants.cab ||
+                          ticketForTheDayAccess[0].travelPlanTransport ==
+                              MyConstants.publicTransport) {
+                        ArtSweetAlert.show(
                             context: context,
-                            builder: (context) {
-                              return travelCostBottomSheet(
-                                  context,
-                                  _startAddress,
-                                  _destinationAddress,
-                                  _distance,
-                                  _time,
-                                  ticketForTheDayAccess[0]
-                                      .travelPlanTransport);
-                            });
-                      });
-                    },
-                    onCancel: () {
-                      Navigator.of(context, rootNavigator: true)
-                          .pop();
-                      endTravelPostApi();
-                    },
-                    cancelButtonColor:
-                    Color(int.parse("0xfff" "C5C5C5")),
-                    confirmButtonColor:
-                    Color(int.parse("0xfff" "507a7d"))));
-          } else {
-            endTravelPostApi();
-          }
-        });
+                            artDialogArgs: ArtDialogArgs(
+                                type: ArtSweetAlertType.warning,
+                                title: MyConstants.appTittle,
+                                text: MyConstants.updateTravel,
+                                showCancelBtn: true,
+                                confirmButtonText: MyConstants.nowButton,
+                                cancelButtonText: MyConstants.laterButton,
+                                onConfirm: () {
+                                  setState(() {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) {
+                                          return travelCostBottomSheet(
+                                              context,
+                                              _startAddress,
+                                              _destinationAddress,
+                                              _distance,
+                                              _time,
+                                              ticketForTheDayAccess[0]
+                                                  .travelPlanTransport);
+                                        });
+                                  });
+                                },
+                                onCancel: () {
+
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  endTravelPostApi(MyConstants.yesButton);
+                                },
+                                cancelButtonColor:
+                                Color(int.parse("0xfff" + "C5C5C5")),
+                                confirmButtonColor:
+                                Color(int.parse("0xfff" + "507a7d"))));
+                      } else {
+                        endTravelPostApi(MyConstants.yesButton);
+                      }
+                    });
+                  },
+                  onCancel: () {
+                    setState(() {
+                      _reachedClicked = false;
+                    });
+                    Navigator.of(context, rootNavigator: true).pop();
+                  },
+                  cancelButtonColor: Color(int.parse("0xfff" + "C5C5C5")),
+                  confirmButtonColor: Color(int.parse("0xfff" + "507a7d"))));
+        }
       } else if (response.getDistanceEntity!.responseCode ==
           MyConstants.response400 ||
           response.getDistanceEntity!.responseCode == MyConstants.response500) {
@@ -1034,14 +1122,14 @@ class _MapViewState extends State<MapView> {
                                 onCancel: () {
                                   Navigator.of(context, rootNavigator: true)
                                       .pop();
-                                  endTravelPostApi();
+                                  endTravelPostApi(MyConstants.yesButton);
                                 },
                                 cancelButtonColor:
                                 Color(int.parse("0xfff" "C5C5C5")),
                                 confirmButtonColor:
                                 Color(int.parse("0xfff" "507a7d"))));
                       } else {
-                        endTravelPostApi();
+                        endTravelPostApi(MyConstants.yesButton);
                       }
                     });
                   },
@@ -1550,7 +1638,7 @@ class _MapViewState extends State<MapView> {
     }
   }
 
-  Future<void> endTravelPostApi() async {
+  Future<void> endTravelPostApi(String? choice) async {
     if (await checkInternetConnection() == true) {
       showAlertDialog(context);
       //setToastMessageLoading(context);
@@ -1563,7 +1651,7 @@ class _MapViewState extends State<MapView> {
         'ticket_id': widget.ticketId,
         'technician_code':
         PreferenceUtils.getString(MyConstants.technicianCode),
-        'reached_customer_location': _destinationAddress,
+        'reached_customer_location': choice == MyConstants.yesButton ? MyConstants.spareIdGetSpare : MyConstants.wareHouseId,
         'dest_lat': widget.destinationLatitude,
         'dest_long': widget.destinationLongitude
       };

@@ -947,6 +947,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.6.0"
+  light_compressor:
+    dependency: "direct main"
+    description:
+      name: light_compressor
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.2"
   lints:
     dependency: transitive
     description:

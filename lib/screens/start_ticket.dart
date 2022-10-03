@@ -267,7 +267,7 @@ class _StartTicketState extends State<StartTicket> {
                       enabled: false,
                       controller: _workTypeController,
                       decoration: const InputDecoration(
-                          labelText: MyConstants.workType,
+                          labelText: MyConstants.serviceGroup,
                           contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           border: OutlineInputBorder()),
                     ),

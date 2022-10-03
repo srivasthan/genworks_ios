@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:light_compressor/light_compressor.dart' as lc;
 import 'package:shimmer/shimmer.dart';
 import 'package:video_compress/video_compress.dart';
 
@@ -578,8 +579,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
                         },
                         items: <String?>[
                           MyConstants.product,
-                          MyConstants.generic,
-                          MyConstants.technology
+                          MyConstants.generic
                         ].map((String? value) {
                           return DropdownMenuItem<String?>(
                             value: value,
@@ -1298,8 +1298,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
                         },
                         items: <String?>[
                           MyConstants.product,
-                          MyConstants.generic,
-                          MyConstants.technology
+                          MyConstants.generic
                         ].map((String? value) {
                           return DropdownMenuItem<String?>(
                             value: value,
@@ -1475,7 +1474,8 @@ class _KnowledgeState extends State<KnowledgeBase> {
                         keyboardType: TextInputType.multiline,
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(
-                            labelText: MyConstants.search,
+                            labelText: MyConstants.problemDescription,
+                            hintText: MyConstants.enterProblemDescription,
                             prefixIcon: Icon(Icons.search),
                             contentPadding: EdgeInsets.fromLTRB(10, 10, 10, 0),
                             border: OutlineInputBorder()),
@@ -1631,11 +1631,16 @@ class _KnowledgeState extends State<KnowledgeBase> {
   }
 
   Future<void> captureVideo() async {
-    MediaInfo? info;
+    var info;
     var photo = await ImagePicker().pickVideo(
         preferredCameraDevice: CameraDevice.rear,
         source: ImageSource.camera,
-        maxDuration: const Duration(minutes: 1));
+        maxDuration: Duration(minutes: 1));
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    final FileDirectory fileDirectory =
+    new FileDirectory(context, MyConstants.imageFolder);
+    Directory? getDirectory;
 
     if (photo != null) {
       setState(() {
@@ -1643,11 +1648,6 @@ class _KnowledgeState extends State<KnowledgeBase> {
       });
 
       if (Platform.isAndroid) {
-        DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        final FileDirectory fileDirectory =
-            FileDirectory(context, MyConstants.imageFolder);
-        Directory? getDirectory;
 
         await _requestPermission(Permission.storage);
 
@@ -1670,14 +1670,13 @@ class _KnowledgeState extends State<KnowledgeBase> {
 
           setState(() {
             _showVideoTick = true;
-            FocusScope.of(context).requestFocus(FocusNode());
+            FocusScope.of(context).requestFocus(new FocusNode());
           });
         } else {
           fileDirectory.createFolder().then((value) async {
             getDirectory = value;
-            if (!await getDirectory!.exists()) {
+            if (!await getDirectory!.exists())
               await getDirectory!.create(recursive: true);
-            }
 
             showVideoDialog(context);
 
@@ -1685,18 +1684,33 @@ class _KnowledgeState extends State<KnowledgeBase> {
                 .copy('${getDirectory!.path}/${timestamp()}.mp4');
             _videoPath = _convertedVideo!.path;
 
-            info = await VideoCompress.compressVideo(
-              _videoPath!,
-              quality: VideoQuality.LowQuality,
-              deleteOrigin: false, // default(false)
-            );
+            File originalVideo = await File(photo.path).copy(_videoPath!);
 
-            _showVideo = await File(info!.path!).copy(_videoPath!);
-            Navigator.of(context, rootNavigator: true).pop();
+            lc.LightCompressor().compressVideo(
+                path: originalVideo.path,
+                destinationPath: '${getDirectory!.path}/${timestamp()}.mp4',
+                videoQuality: lc.VideoQuality.low,
+                isMinBitrateCheckEnabled: false,
+                frameRate: 24 /* or ignore it */).then((compressor) async {
 
-            setState(() {
-              _showVideoTick = true;
-              FocusScope.of(context).requestFocus(FocusNode());
+              if (compressor is lc.OnSuccess) {
+                _showVideo = await File(compressor.destinationPath).copy(_videoPath!);
+
+                PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+
+                setState(() {
+                  _showVideoTick = true;
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                });
+              } else if (compressor is lc.OnFailure) {
+                // failure message
+                print(compressor.message);
+
+              } else if (compressor is lc.OnCancelled) {
+                print(compressor.isCancelled);
+              }
+
+              Navigator.of(context, rootNavigator: true).pop();
             });
           });
         }
@@ -1721,12 +1735,15 @@ class _KnowledgeState extends State<KnowledgeBase> {
 
           setState(() {
             _showVideoTick = true;
-            FocusScope.of(context).requestFocus(FocusNode());
+            FocusScope.of(context).requestFocus(new FocusNode());
           });
         }
       }
 
-      PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+      if((Platform.isAndroid && androidInfo.version.sdkInt >=
+          int.parse(MyConstants.osVersion)) || Platform.isIOS) {
+        PreferenceUtils.setString(MyConstants.videoPath, _showVideo!.path);
+      }
     } else {
       setToastMessage(context, MyConstants.videoError);
     }
@@ -2058,21 +2075,31 @@ class _KnowledgeState extends State<KnowledgeBase> {
           _noDataAvailable = false;
           _referSolutionList.clear();
         });
+        Map<String, dynamic> referSolutionData = {};
 
         FocusScope.of(context).requestFocus(FocusNode());
 
-        //convert data to form data
-        Map<String, dynamic> referSolutionData = {
-          "technician_code":
-              PreferenceUtils.getString(MyConstants.technicianCode),
-          "problem_desc": _rs_problemDescription.text.trim(),
-          "product_id": _rs_productVisisble == true
-              ? _rs_productId
-              : MyConstants.chargeable,
-          "product_sub_id": _rs_productVisisble == true
-              ? _rs_productSubId
-              : MyConstants.chargeable
-        };
+        if(_rs_selectedDropdownValue == MyConstants.generic) {
+          //convert data to form data
+          referSolutionData = {
+            "technician_code":
+            PreferenceUtils.getString(MyConstants.technicianCode),
+            "problem_desc": _rs_problemDescription.text.trim()
+          };
+        } else {
+          //convert data to form data
+          referSolutionData = {
+            "technician_code":
+            PreferenceUtils.getString(MyConstants.technicianCode),
+            "problem_desc": _rs_problemDescription.text.trim(),
+            "product_id": _rs_productVisisble == true
+                ? _rs_productId
+                : null,
+            "product_sub_id": _rs_productVisisble == true
+                ? _rs_productSubId
+                : null
+          };
+        }
 
         ApiService apiService = ApiService(dio.Dio());
         final response = await apiService.referKnowledgeBaseSolution(
@@ -2179,8 +2206,8 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                       _referSolutionList[index].uploadVideo ??
                                           "",
                                       _referSolutionList[index]
-                                          .productCategory!,
-                                      _referSolutionList[index].category!,
+                                          .productCategory ?? MyConstants.na,
+                                      _referSolutionList[index].category ?? MyConstants.na,
                                       _referSolutionList[index].problemDesc!,
                                       _referSolutionList[index].solution!);
                                 });
@@ -2197,7 +2224,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                           const SizedBox(
                                             height: 10.0,
                                           ),
-                                          Row(
+                                          _rs_selectedDropdownValue != MyConstants.generic ? Row(
                                             children: [
                                               const Padding(
                                                   padding:
@@ -2229,7 +2256,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                                       child: Text(
                                                           _referSolutionList[
                                                                   index]
-                                                              .productCategory!,
+                                                              .productCategory ?? MyConstants.na,
                                                           style: const TextStyle(
                                                               fontSize: 13)),
                                                     ),
@@ -2237,11 +2264,11 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                                 ),
                                               )
                                             ],
-                                          ),
-                                          const SizedBox(
+                                          ) : Container(),
+                                          _rs_selectedDropdownValue != MyConstants.generic ? const SizedBox(
                                             height: 10.0,
-                                          ),
-                                          Row(
+                                          ) : Container(),
+                                          _rs_selectedDropdownValue != MyConstants.generic ? Row(
                                             children: [
                                               const Padding(
                                                   padding:
@@ -2273,7 +2300,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                                       child: Text(
                                                           _referSolutionList[
                                                                   index]
-                                                              .category!,
+                                                              .category ?? MyConstants.na,
                                                           style: const TextStyle(
                                                               fontSize: 13)),
                                                     ),
@@ -2281,10 +2308,10 @@ class _KnowledgeState extends State<KnowledgeBase> {
                                                 ),
                                               )
                                             ],
-                                          ),
-                                          const SizedBox(
+                                          ) : Container(),
+                                          _rs_selectedDropdownValue != MyConstants.generic ? const SizedBox(
                                             height: 10.0,
-                                          ),
+                                          ) : Container(),
                                           Row(
                                             children: [
                                               const Padding(
@@ -2439,7 +2466,7 @@ class _KnowledgeState extends State<KnowledgeBase> {
             const SizedBox(
               height: 10.0,
             ),
-            Expanded(
+            _rs_selectedDropdownValue != MyConstants.generic ? Expanded(
               flex: 0,
               child: Padding(
                 padding:
@@ -2454,10 +2481,10 @@ class _KnowledgeState extends State<KnowledgeBase> {
                       border: OutlineInputBorder()),
                 ),
               ),
-            ),
-            const SizedBox(
+            ) : Container(),
+            _rs_selectedDropdownValue != MyConstants.generic ? const SizedBox(
               height: 10.0,
-            ),
+            ) : Container(),
             Expanded(
               flex: 0,
               child: Padding(

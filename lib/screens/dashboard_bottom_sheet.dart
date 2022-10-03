@@ -199,12 +199,12 @@ const List<Choice> choices = [
       icon: ImageIcon(AssetImage("assets/images/service_report.png"), color: Colors.white)),
   Choice(
       title: 'Spare Inventory',
-      icon: ImageIcon(AssetImage("assets/images/si.png"), color: Colors.white)),
+      icon: ImageIcon(AssetImage("assets/images/spare_inventory.png"), color: Colors.white)),
   Choice(
       title: 'Training', icon: ImageIcon(AssetImage("assets/images/training.png"), color: Colors.white)),
   Choice(
       title: 'Knowledge base',
-      icon: ImageIcon(AssetImage("assets/images/knowledge_base.png"), color: Colors.white)),
+      icon: ImageIcon(AssetImage("assets/images/kb.png"), color: Colors.white)),
 ];
 
 class ChoiceCard extends StatelessWidget {
@@ -361,5 +361,5 @@ const List<Choice> choices1 = [
       icon: ImageIcon(AssetImage("assets/images/reimbursement.png"), color: Colors.white)),
   Choice(
       title: 'Smart Scheduling',
-      icon: ImageIcon(AssetImage("assets/images/schedule.png"), color: Colors.white)),
+      icon: ImageIcon(AssetImage("assets/images/smart_scheduling.png"), color: Colors.white)),
 ];
