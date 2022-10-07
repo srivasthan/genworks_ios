@@ -3470,7 +3470,7 @@ class _SpareInventory extends State<SpareInventory> {
                   const Expanded(
                       flex: 0,
                       child: Text(
-                        "${MyConstants.status}                   :",
+                        "${MyConstants.status}               :",
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w700),
                       )),

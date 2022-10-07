@@ -309,28 +309,14 @@ class _MapViewState extends State<MapView> {
       });
     }
 
-    Polyline polyLine = Polyline(
-      polylineId: const PolylineId('direction'),
-      color: Colors.blue,
-      points: List.empty(growable: true),
-      width: 5,
-      startCap: Cap.roundCap,
-      endCap: Cap.roundCap,
-      jointType: JointType.round,
-      geodesic: true,
+    PolylineId id = PolylineId('poly');
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.indigo,
+      points: polylineCoordinates,
+      width: 3,
     );
-    polyLine.points.add(LatLng(startLatitude, startLongitude));
-    polyLine.points.add(LatLng(destinationLatitude, destinationLongitude));
-    _directionPolyline.add(polyLine);
-
-    // PolylineId id = const PolylineId('poly');
-    // Polyline polyline = Polyline(
-    //   polylineId: id,
-    //   color: Colors.indigo,
-    //   points: polylineCoordinates,
-    //   width: 3,
-    // );
-    // polyLines[id] = polyline;
+    polyLines[id] = polyline;
   }
 
   Future<T?> pushPage<T>(BuildContext context) {
@@ -374,7 +360,7 @@ class _MapViewState extends State<MapView> {
                 zoomControlsEnabled: false,
                 mapType: MapType.normal,
                 minMaxZoomPreference: const MinMaxZoomPreference(5,10),
-                polylines: _directionPolyline,
+                polylines: Set<Polyline>.of(polyLines.values),
                 onMapCreated: (GoogleMapController controller) async {
                   mapController = controller;
 

@@ -817,6 +817,7 @@ class _SpareRequestState extends State<SpareRequest> {
     return ListView.builder(
         scrollDirection: Axis.vertical,
         itemCount: spareRequestDataList.length,
+        physics: const BouncingScrollPhysics(),
         shrinkWrap: true,
         itemBuilder: (context, index) {
           return Column(children: [

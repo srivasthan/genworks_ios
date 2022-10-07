@@ -542,10 +542,10 @@ class _ChequeInformationState extends State<ChequeInformation> {
         await newAMCCreationDataDao.findNewAMCCreationDataByCheckable(true);
 
     if (newAMCCreationData.isNotEmpty) {
-      if (newAMCCreationData[0].customerCode!.isNotEmpty) {
-        addNewProductSelection();
-      } else {
+      if (newAMCCreationData[0].customerCode == MyConstants.na) {
         newAmcCreationSubmit();
+      } else {
+        addNewProductSelection();
       }
     } else if (amcTicketDetailsData.isNotEmpty) {
       activityAmcTicketDetailsAmcTicket(
@@ -661,7 +661,7 @@ class _ChequeInformationState extends State<ChequeInformation> {
         };
 
         ApiService apiService = ApiService(dio.Dio());
-        final response = await apiService.technicianRenewAmc(
+        final response = await apiService.addNewProductAmc(
             PreferenceUtils.getString(MyConstants.token), newProductData);
 
         if (response.addTransferEntity != null) {

@@ -2215,7 +2215,7 @@ class _AddAmc extends State<AddAmc> {
         modeOfPayment: MyConstants.cheque,
         checkable: true,
         customerCode: widget.type == MyConstants.createAMC
-            ? MyConstants.empty
+            ? MyConstants.na
             : _cusCode);
 
     newAMCCreationDataDao.insertNewAMCCreationData(newAMCCreationDataTable);

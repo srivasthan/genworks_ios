@@ -92,7 +92,7 @@ class MyConstants {
   static const String punchStatus = "punch_status";
   static const String videoError = "Video not taken";
   static const String recordVideo = "Record Video";
-  static const String baseurl = "https://dev.kaspontech.com/";
+  static const String baseurl = "https://genworks.kaspontech.com/";
   static const String base64 = "data:image/png;base64,";
   static const String attendanceId = "attendance_id";
   static const String profilePicture = "profile_pic";
