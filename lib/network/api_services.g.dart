@@ -9,7 +9,7 @@ part of 'api_services.dart';
 class _ApiService implements ApiService {
   _ApiService(this._dio, {this.baseUrl}) {
     ArgumentError.checkNotNull(_dio, '_dio');
-    this.baseUrl ??= 'https://genworks.kaspontech.com/djadmin_qa/';
+    this.baseUrl ??= 'https://genworks.kaspontech.com/djadmin/';
   }
 
   final Dio? _dio;

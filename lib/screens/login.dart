@@ -119,7 +119,7 @@ class _LoginState extends State<Login> {
           PreferenceUtils.setString("password", passwordController.text.trim());
 
           final Response result = await Dio().request(
-              'https://genworks.kaspontech.com/djadmin_qa/technician_login/',
+              'https://genworks.kaspontech.com/djadmin/technician_login/',
               queryParameters: <String, dynamic>{},
               options: Options(
                   method: 'POST',

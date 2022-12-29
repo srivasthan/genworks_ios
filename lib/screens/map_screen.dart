@@ -309,7 +309,7 @@ class _MapViewState extends State<MapView> {
       });
     }
 
-    PolylineId id = PolylineId('poly');
+    PolylineId id = const PolylineId('poly');
     Polyline polyline = Polyline(
       polylineId: id,
       color: Colors.indigo,
@@ -333,11 +333,8 @@ class _MapViewState extends State<MapView> {
         // pushPage(context);
         return false;
       },
-      child: Container(
-        height: height,
-        width: width,
-        child: Scaffold(
-          key: _scaffoldKey,
+      child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios),
@@ -614,8 +611,7 @@ class _MapViewState extends State<MapView> {
               )
             ],
           )
-        ),
-      ),
+      )
     );
   }
 
@@ -961,6 +957,7 @@ class _MapViewState extends State<MapView> {
                               .pop();
                           showModalBottomSheet(
                               context: context,
+                              isScrollControlled: true,
                               builder: (context) {
                                 return travelCostBottomSheet(
                                     context,
@@ -1020,6 +1017,7 @@ class _MapViewState extends State<MapView> {
                                         .pop();
                                     showModalBottomSheet(
                                         context: context,
+                                        isScrollControlled: true,
                                         builder: (context) {
                                           return travelCostBottomSheet(
                                               context,
@@ -1093,6 +1091,7 @@ class _MapViewState extends State<MapView> {
                                         .pop();
                                     showModalBottomSheet(
                                         context: context,
+                                        isScrollControlled: true,
                                         builder: (context) {
                                           return travelCostBottomSheet(
                                               context,
@@ -1143,322 +1142,401 @@ class _MapViewState extends State<MapView> {
       String travelPlanTransport) {
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter myState) {
-          return SingleChildScrollView(
-            child: Container(
-              child: Column(children: [
-                Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                        color: Color(int.parse("0xfff" "5C7E7F")),
-                        borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(10.0),
-                            bottomRight: Radius.circular(10.0))),
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            const Text(
-                              MyConstants.travelCost,
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            IconButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                icon: const Icon(
-                                  Icons.clear,
-                                  color: Colors.white,
-                                ))
-                          ],
-                        ))),
-                Container(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: Column(mainAxisSize: MainAxisSize.min, children: <
-                        Widget>[
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.origin,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: Color(int.parse("0xfff" + "5C7E7F")),
+                            borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(10.0),
+                                bottomRight: Radius.circular(10.0))),
+                        child: Padding(
+                            padding: const EdgeInsets.only(left: 15),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: Text(startAddress!,
-                                      style: const TextStyle(fontSize: 15)),
+                                const Text(
+                                  MyConstants.travelCost,
+                                  style: TextStyle(fontSize: 13.0, color: Colors.white),
                                 ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.destination,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: Text(destinationAddress!,
-                                      style: const TextStyle(fontSize: 15)),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.travelDistance,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: Text(distance!,
-                                      style: const TextStyle(fontSize: 15)),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.travelTime,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child:
-                                  Text(time!, style: const TextStyle(fontSize: 15)),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.travelMode,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: Text(travelPlanTransport,
-                                      style: const TextStyle(fontSize: 15)),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.travelCharge,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0, right: 20.0),
-                                  child: TextFormField(
-                                    keyboardType: TextInputType.number,
-                                    controller: _travelCostController,
-                                    autovalidateMode:
-                                    AutovalidateMode.onUserInteraction,
-                                    decoration: const InputDecoration(
-                                        labelText: MyConstants.enterTravelAmount,
-                                        border: OutlineInputBorder()),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          const Padding(padding: EdgeInsets.all(5.0)),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const <Widget>[
-                                Text(MyConstants.attachment,
-                                    style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600)),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 0,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      showModalBottomSheet(
-                                          context: context,
-                                          barrierColor:
-                                          Colors.black.withAlpha(150),
-                                          builder: (context) {
-                                            return imageBottomSheet(context, myState);
-                                          });
+                                IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _reachedClicked = false;
+                                      });
+                                      Navigator.of(context).pop();
                                     },
-                                    //captureImage(Myconstants.camera, myState),
-                                    child: const Text(MyConstants.attachmentString,
-                                        style: TextStyle(
-                                            color: Colors.lightBlue, fontSize: 15)),
-                                  ),
-                                ),
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      color: Colors.white,
+                                    ))
                               ],
-                            ),
+                            ))),
+                    Container(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Column(mainAxisSize: MainAxisSize.min, children: <
+                            Widget>[
+                          const SizedBox(
+                            height: 10.0,
                           ),
-                          Expanded(
-                            flex: 0,
-                            child: Visibility(
-                              visible: _showTick,
-                              child: IconButton(
-                                onPressed: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ShowImage(
-                                            image: "",
-                                            capturedImage: capturedImage))),
-                                icon: Image.asset(
-                                  'assets/images/check.png',
-                                  width: 25,
-                                  height: 25,
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.origin,
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
                                 ),
                               ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: Text(startAddress!,
+                                          style: const TextStyle(fontSize: 13.0)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.destination,
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: Text(destinationAddress!,
+                                          style: const TextStyle(fontSize: 13.0)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.travelDistance,
+                                        style: TextStyle(
+                                          fontSize: 13.0,)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: Text(distance!,
+                                          style: const TextStyle(fontSize: 13.0)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.travelTime,
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child:
+                                      Text(time!, style: const TextStyle(fontSize: 13.0)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.travelMode,
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: Text(travelPlanTransport,
+                                          style: const TextStyle(fontSize: 13.0)),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text(MyConstants.travelCharge,
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0, right: 80.0),
+                                      child: TextFormField(
+                                        textInputAction: TextInputAction.done,
+                                        maxLength: 5,
+                                        keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp(r'^\d+\.?\d*')),
+                                          FilteringTextInputFormatter.allow(
+                                              RegExp('[0-9.,]+'))
+                                        ],
+                                        controller: _travelCostController,
+                                        autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                        decoration: InputDecoration(
+                                            labelText: MyConstants.enterAmount,
+                                            labelStyle: const TextStyle(fontSize: 13.0),
+                                            isDense: true,
+                                            contentPadding: const EdgeInsets.fromLTRB(10, 10, 2, 2),
+                                            counterText: MyConstants.empty,
+                                            border: const OutlineInputBorder()),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 10.0,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(padding: EdgeInsets.all(5.0)),
+                              Expanded(
+                                flex: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const <Widget>[
+                                    Text('Attachment',
+                                        style: TextStyle(
+                                            fontSize: 13.0)),
+                                  ],
+                                ),
+                              ),
+                              Expanded(flex: 0, child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const <Widget>[
+                                  Text(':',
+                                      style: TextStyle(
+                                          fontSize: 13.0)),
+                                ],
+                              )),
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          showModalBottomSheet(
+                                              context: context,
+                                              barrierColor:
+                                              Colors.black.withAlpha(150),
+                                              builder: (context) {
+                                                return imageBottomSheet(context, myState);
+                                              });
+                                        },
+                                        //captureImage(Myconstants.camera, myState),
+                                        child: const Text(MyConstants.attachmentString,
+                                            style: TextStyle(
+                                                color: Colors.lightBlue, fontSize: 13.0)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                flex: 0,
+                                child: Visibility(
+                                  visible: _showTick,
+                                  child: IconButton(
+                                    onPressed: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => ShowImage(
+                                                image: "",
+                                                capturedImage: capturedImage))),
+                                    icon: Image.asset(
+                                      'assets/images/check.png',
+                                      width: 25,
+                                      height: 25,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 20.0,
+                          ),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (_travelCostController.text.isEmpty)
+                                  setToastMessage(context, MyConstants.travelCostError);
+                                else {
+                                  Navigator.of(context).pop();
+                                  callTravelPlanTransportBill();
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30.0)), backgroundColor: Color(int.parse("0xfff" "5C7E7F")),
+                                  minimumSize: const Size(140, 35)),
+                              child: const Text(MyConstants.submitButton,
+                                  style: TextStyle(fontSize: 15.0, color: Colors.white)),
                             ),
                           )
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (_travelCostController.text.isEmpty) {
-                              setToastMessage(context, MyConstants.travelCostError);
-                            } else if(encImageBase64 == null) {
-                              setToastMessage(context, MyConstants.attachmentImageError);
-                            } else {
-                              Navigator.of(context).pop();
-                              callTravelPlanTransportBill();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0)), backgroundColor: Color(int.parse("0xfff" "3eccbb")),
-                              minimumSize: const Size(140, 35)),
-                          child: const Text(MyConstants.submitButton,
-                              style: TextStyle(fontSize: 15, color: Colors.white)),
-                        ),
-                      )
-                    ]))
-              ]),
-            ),
+                        ]))
+                  ])
+            )
           );
         });
   }

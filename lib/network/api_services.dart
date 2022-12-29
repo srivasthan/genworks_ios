@@ -53,7 +53,7 @@ import 'Response/work_type.dart';
 part 'api_services.g.dart';
 
 //flutter pub run build_runner build
-@RestApi(baseUrl: "https://genworks.kaspontech.com/djadmin_qa/")
+@RestApi(baseUrl: "https://genworks.kaspontech.com/djadmin/")
 abstract class ApiService {
   factory ApiService(Dio dio, {String? baseUrl}) {
     dio.options = BaseOptions(

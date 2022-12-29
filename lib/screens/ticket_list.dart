@@ -8,6 +8,7 @@ import 'package:fieldpro_genworks_healthcare/screens/start_ticket.dart';
 import 'package:fieldpro_genworks_healthcare/screens/submit_complete.dart';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:material_segmented_control/material_segmented_control.dart';
 import 'package:shimmer/shimmer.dart';
@@ -4663,29 +4664,34 @@ class _TicketListState extends State<TicketList> {
                                                             .size
                                                             .width,
                                                         child: ElevatedButton(
-                                                          onPressed: () {
-                                                            Navigator
-                                                                .pushReplacement(
-                                                                context,
-                                                                MaterialPageRoute(
-                                                                    builder: (
-                                                                        context) =>
-                                                                        MapView(
-                                                                            destinationLatitude,
-                                                                            destinationLongitude,
-                                                                            _ticketForTheDayId,
-                                                                            _ticketForTheDayPriority,
-                                                                            ticketForTheDayList[
-                                                                            index]
-                                                                                .location,
-                                                                            ticketForTheDayList[
-                                                                            index]
-                                                                                .status,
-                                                                            ticketForTheDayList[
-                                                                            index]
-                                                                                .ticketType,
-                                                                            MyConstants
-                                                                                .startTicketType)));
+                                                          onPressed: () async {
+                                                            bool serviceEnabled = await location.serviceEnabled();
+                                                            if(!serviceEnabled){
+                                                              serviceEnabled = await location.requestService();
+                                                            } else {
+                                                              Navigator.pushReplacement(
+                                                                  context,
+                                                                  MaterialPageRoute(
+                                                                      builder: (
+                                                                          context) =>
+                                                                          MapView(
+                                                                              destinationLatitude,
+                                                                              destinationLongitude,
+                                                                              _ticketForTheDayId,
+                                                                              _ticketForTheDayPriority,
+                                                                              ticketForTheDayList[
+                                                                              index]
+                                                                                  .location,
+                                                                              ticketForTheDayList[
+                                                                              index]
+                                                                                  .status,
+                                                                              ticketForTheDayList[
+                                                                              index]
+                                                                                  .ticketType,
+                                                                              MyConstants
+                                                                                  .startTicketType)
+                                                                  ));
+                                                            }
                                                           },
                                                           style: ElevatedButton
                                                               .styleFrom(

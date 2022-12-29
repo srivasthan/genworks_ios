@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:location/location.dart' as prefixLocation;
 import 'package:location/location.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:permission_handler/permission_handler.dart' as permission;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -121,39 +124,267 @@ class _DashBoardState extends State<DashBoard> {
               ),
               body: _isLoading == true
                   ? Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[400]!,
-                  child: SingleChildScrollView(
-                    child: Column(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[400]!,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Expanded(
+                              flex: 0,
+                              child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                              color: Color(
+                                                  int.parse("0xfff" "5C7E7F")),
+                                              borderRadius: BorderRadius.zero),
+                                          child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 15, right: 15.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: const <Widget>[
+                                                  Text(
+                                                    MyConstants.todayActivity,
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                  Text(
+                                                    "0/0",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                ],
+                                              ))),
+                                      const SizedBox(
+                                        height: 15.0,
+                                      ),
+                                      CircularProgressView(90),
+                                      const SizedBox(
+                                        height: 20.0,
+                                      ),
+                                      const Text(MyConstants.timeToBegin),
+                                      const SizedBox(
+                                        height: 20.0,
+                                      )
+                                    ],
+                                  )),
+                            ),
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            Expanded(
+                              flex: 0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  children: <Widget>[
+                                    Expanded(
+                                      flex: 0,
+                                      child: Container(
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                              color: Color(
+                                                  int.parse("0xfff" "5C7E7F")),
+                                              borderRadius: BorderRadius.zero),
+                                          child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 15, right: 15.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: const <Widget>[
+                                                  Text(
+                                                    MyConstants.todayActivity,
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                  Text(
+                                                    "${MyConstants.overAllRank}1",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  ),
+                                                ],
+                                              ))),
+                                    ),
+                                    const SizedBox(
+                                      height: 15.0,
+                                    ),
+                                    Expanded(
+                                      flex: 0,
+                                      child: Row(
+                                        children: const <Widget>[
+                                          SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              MyConstants.points,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              MyConstants.nextLevel,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 0,
+                                      child: Row(
+                                        children: <Widget>[
+                                          const SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          const Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              "0",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w800),
+                                            ),
+                                          ),
+                                          const Expanded(
+                                            flex: 0,
+                                            child: Text(
+                                                "0${MyConstants.percentageSymbol}"),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: LinearPercentIndicator(
+                                              width: 140.0,
+                                              lineHeight: 5.0,
+                                              percent: 0.5,
+                                              backgroundColor: Colors.grey,
+                                              progressColor: Colors.blue,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 20.0,
+                                    ),
+                                    Expanded(
+                                      flex: 0,
+                                      child: Row(
+                                        children: const <Widget>[
+                                          SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              MyConstants.points,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              MyConstants.nextLevel,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 0,
+                                      child: Row(
+                                        children: <Widget>[
+                                          const SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          const Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              "0",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w800),
+                                            ),
+                                          ),
+                                          const Expanded(
+                                            flex: 0,
+                                            child: Text(
+                                                "0${MyConstants.percentageSymbol}"),
+                                          ),
+                                          Expanded(
+                                            flex: 1,
+                                            child: LinearPercentIndicator(
+                                              width: 140.0,
+                                              lineHeight: 5.0,
+                                              percent: 0.5,
+                                              backgroundColor: Colors.grey,
+                                              progressColor: Colors.blue,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 20.0,
+                                    ),
+                                    // Expanded(
+                                    //     flex: 0,
+                                    //     child: Center(
+                                    //         child: Column(
+                                    //           children: [
+                                    //             //LineChartSample7(),
+                                    //             Container()
+                                    //           ],
+                                    //         ))),
+                                    // const SizedBox(
+                                    //   height: 20.0,
+                                    // )
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ))
+                  : Column(
                       children: [
                         Expanded(
                           flex: 0,
                           child: Padding(
-                              padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.only(
+                                top: 16.0, left: 16.0, right: 16.0),
+                            child: Container(
+                              color: Colors.white,
                               child: Column(
                                 children: <Widget>[
                                   Container(
                                       height: 30,
                                       decoration: BoxDecoration(
-                                          color: Color(int.parse(
-                                              "0xfff" "5C7E7F")),
+                                          color: Color(
+                                              int.parse("0xfff" "5C7E7F")),
                                           borderRadius: BorderRadius.zero),
                                       child: Padding(
                                           padding: const EdgeInsets.only(
                                               left: 15, right: 15.0),
                                           child: Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment
-                                                .spaceBetween,
-                                            children: const <Widget>[
-                                              Text(
+                                                MainAxisAlignment.spaceBetween,
+                                            children: <Widget>[
+                                              const Text(
                                                 MyConstants.todayActivity,
                                                 style: TextStyle(
                                                     color: Colors.white),
                                               ),
                                               Text(
-                                                "0/0",
-                                                style: TextStyle(
+                                                _taskCount.toString() +
+                                                    MyConstants.bar +
+                                                    _totalTaskCount.toString(),
+                                                style: const TextStyle(
                                                     color: Colors.white),
                                               ),
                                             ],
@@ -161,7 +392,7 @@ class _DashBoardState extends State<DashBoard> {
                                   const SizedBox(
                                     height: 15.0,
                                   ),
-                                  CircularProgressView(90),
+                                  CircularProgressView(_percent!),
                                   const SizedBox(
                                     height: 20.0,
                                   ),
@@ -170,401 +401,175 @@ class _DashBoardState extends State<DashBoard> {
                                     height: 20.0,
                                   )
                                 ],
-                              )),
-                        ),
-                        const SizedBox(
-                          height: 15.0,
+                              ),
+                            ),
+                          ),
                         ),
                         Expanded(
-                          flex: 0,
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: <Widget>[
-                                Expanded(
-                                  flex: 0,
-                                  child: Container(
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                          color: Color(int.parse(
-                                              "0xfff" "5C7E7F")),
-                                          borderRadius: BorderRadius.zero),
-                                      child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 15, right: 15.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment
-                                                .spaceBetween,
-                                            children: const <Widget>[
-                                              Text(
-                                                MyConstants.todayActivity,
+                            child: Container(
+                              color: Colors.white,
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 0,
+                                    child: Container(
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                            color: Color(
+                                                int.parse("0xfff" "5C7E7F")),
+                                            borderRadius: BorderRadius.zero),
+                                        child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 15, right: 15.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                const Text(
+                                                  MyConstants.todayActivity,
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                                Text(
+                                                  MyConstants.overAllRank +
+                                                      _overAllRank!,
+                                                  style: const TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ],
+                                            ))),
+                                  ),
+                                  const SizedBox(
+                                    height: 15.0,
+                                  ),
+                                  Expanded(
+                                    flex: 0,
+                                    child: Row(
+                                      children: const <Widget>[
+                                        SizedBox(
+                                          width: 10.0,
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            MyConstants.points,
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            MyConstants.nextLevel,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 0,
+                                    child: Row(
+                                      children: <Widget>[
+                                        const SizedBox(
+                                          width: 10.0,
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            _techRewardPoints!,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w800),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 0,
+                                          child: Text(
+                                              _nextRewardPoints.toString() +
+                                                  MyConstants.percentageSymbol),
+                                        ),
+                                        Expanded(
+                                          flex: 1,
+                                          child: LinearPercentIndicator(
+                                            width: 140.0,
+                                            lineHeight: 5.0,
+                                            percent: _nextLevelPercentage!,
+                                            backgroundColor: Colors.grey,
+                                            progressColor: Colors.blue,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 20.0,
+                                  ),
+                                  Expanded(
+                                    child: Center(
+                                        child: _monthlyListSize == 0
+                                            ? Text(
+                                                MyConstants.noDataAvailable,
                                                 style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                              Text(
-                                                "${MyConstants.overAllRank}1",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ],
-                                          ))),
-                                ),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: Row(
-                                    children: const <Widget>[
-                                      SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          MyConstants.points,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          MyConstants.nextLevel,
-                                        ),
-                                      ),
-                                    ],
+                                                    color: Color(int.parse(
+                                                        "0xfff" "ffbf88"))),
+                                              )
+                                            : SingleChildScrollView(
+                                                child: Column(
+                                                children: [
+                                                  Container(),
+                                                  //LineChartSample7(),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      SizedBox(
+                                                          width: 50,
+                                                          height: 50,
+                                                          child: CustomPaint(
+                                                            painter:
+                                                                OpenPainter(),
+                                                          )),
+                                                      const Text("Month")
+                                                    ],
+                                                  ),
+                                                ],
+                                              ))),
                                   ),
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: Row(
-                                    children: <Widget>[
-                                      const SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      const Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          "0",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w800),
-                                        ),
-                                      ),
-                                      const Expanded(
-                                        flex: 0,
-                                        child: Text("0${MyConstants.percentageSymbol}"),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: LinearPercentIndicator(
-                                          width: 140.0,
-                                          lineHeight: 5.0,
-                                          percent: 0.5,
-                                          backgroundColor: Colors.grey,
-                                          progressColor: Colors.blue,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 20.0,
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: Row(
-                                    children: const <Widget>[
-                                      SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          MyConstants.points,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          MyConstants.nextLevel,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: Row(
-                                    children: <Widget>[
-                                      const SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      const Expanded(
-                                        flex: 1,
-                                        child: Text(
-                                          "0",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w800),
-                                        ),
-                                      ),
-                                      const Expanded(
-                                        flex: 0,
-                                        child: Text("0${MyConstants.percentageSymbol}"),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: LinearPercentIndicator(
-                                          width: 140.0,
-                                          lineHeight: 5.0,
-                                          percent: 0.5,
-                                          backgroundColor: Colors.grey,
-                                          progressColor: Colors.blue,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 20.0,
-                                ),
-                                // Expanded(
-                                //     flex: 0,
-                                //     child: Center(
-                                //         child: Column(
-                                //           children: [
-                                //             //LineChartSample7(),
-                                //             Container()
-                                //           ],
-                                //         ))),
-                                // const SizedBox(
-                                //   height: 20.0,
-                                // )
-                              ],
+                                  const SizedBox(
+                                    height: 20.0,
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                         )
                       ],
                     ),
-                  ))
-                  : Column(
-                children: [
-                  Expanded(
-                    flex: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 16.0, left: 16.0, right: 16.0),
-                      child: Container(
-                        color: Colors.white,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: Color(
-                                        int.parse("0xfff" "5C7E7F")),
-                                    borderRadius: BorderRadius.zero),
-                                child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 15, right: 15.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        const Text(
-                                          MyConstants.todayActivity,
-                                          style: TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        Text(
-                                          _taskCount.toString() +
-                                              MyConstants.bar +
-                                              _totalTaskCount.toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                      ],
-                                    ))),
-                            const SizedBox(
-                              height: 15.0,
-                            ),
-                            CircularProgressView(_percent!),
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                            const Text(MyConstants.timeToBegin),
-                            const SizedBox(
-                              height: 20.0,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Container(
-                        color: Colors.white,
-                        child: Column(
-                          children: <Widget>[
-                            Expanded(
-                              flex: 0,
-                              child: Container(
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      color: Color(
-                                          int.parse("0xfff" "5C7E7F")),
-                                      borderRadius: BorderRadius.zero),
-                                  child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 15, right: 15.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .spaceBetween,
-                                        children: <Widget>[
-                                          const Text(
-                                            MyConstants.todayActivity,
-                                            style: TextStyle(
-                                                color: Colors.white),
-                                          ),
-                                          Text(
-                                            MyConstants.overAllRank +
-                                                _overAllRank!,
-                                            style: const TextStyle(
-                                                color: Colors.white),
-                                          ),
-                                        ],
-                                      ))),
-                            ),
-                            const SizedBox(
-                              height: 15.0,
-                            ),
-                            Expanded(
-                              flex: 0,
-                              child: Row(
-                                children: const <Widget>[
-                                  SizedBox(
-                                    width: 10.0,
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      MyConstants.points,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      MyConstants.nextLevel,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 0,
-                              child: Row(
-                                children: <Widget>[
-                                  const SizedBox(
-                                    width: 10.0,
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Text(
-                                      _techRewardPoints!,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w800),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 0,
-                                    child: Text(
-                                        _nextRewardPoints.toString() +
-                                            MyConstants.percentageSymbol),
-                                  ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: LinearPercentIndicator(
-                                      width: 140.0,
-                                      lineHeight: 5.0,
-                                      percent: _nextLevelPercentage!,
-                                      backgroundColor: Colors.grey,
-                                      progressColor: Colors.blue,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 20.0,
-                            ),
-                            Expanded(
-                              child: Center(
-                                  child: _monthlyListSize == 0
-                                      ? Text(
-                                    MyConstants.noDataAvailable,
-                                    style: TextStyle(
-                                        color: Color(int.parse(
-                                            "0xfff" "ffbf88"))),
-                                  )
-                                      : SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          Container(),
-                                          //LineChartSample7(),
-                                          Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment
-                                                .center,
-                                            children: [
-                                              SizedBox(
-                                                  width: 50,
-                                                  height: 50,
-                                                  child: CustomPaint(
-                                                    painter:
-                                                    OpenPainter(),
-                                                  )),
-                                              const Text("Month")
-                                            ],
-                                          ),
-                                        ],
-                                      ))),
-                            ),
-                            const SizedBox(
-                              height: 20.0,
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
               floatingActionButton: _isLoading == true
                   ? Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[400]!,
-                  child: FloatingActionButton(
-                    backgroundColor: Color(int.parse("0xfff" "2b6c72")),
-                    elevation: 0.0,
-                    onPressed: () {},
-                    child: const Icon(Icons.calendar_view_day_sharp),
-                  ))
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[400]!,
+                      child: FloatingActionButton(
+                        backgroundColor: Color(int.parse("0xfff" "2b6c72")),
+                        elevation: 0.0,
+                        onPressed: () {},
+                        child: const Icon(Icons.calendar_view_day_sharp),
+                      ))
                   : FloatingActionButton(
-                backgroundColor: Color(int.parse("0xfff" "2b6c72")),
-                elevation: 0.0,
-                child: const Icon(Icons.calendar_view_day_sharp),
-                onPressed: () {
-                  if (PreferenceUtils.getInteger(
-                      MyConstants.punchStatus) ==
-                      1) {
-                    dashBoardBottomSheet(context, true);
-                  } else {
-                    dashBoardBottomSheet(context, false);
-                  }
-                },
-              ),
+                      backgroundColor: Color(int.parse("0xfff" "2b6c72")),
+                      elevation: 0.0,
+                      child: const Icon(Icons.calendar_view_day_sharp),
+                      onPressed: () {
+                        if (PreferenceUtils.getInteger(
+                                MyConstants.punchStatus) ==
+                            1) {
+                          dashBoardBottomSheet(context, true);
+                        } else {
+                          dashBoardBottomSheet(context, false);
+                        }
+                      },
+                    ),
             )
           ],
         ),
@@ -577,19 +582,15 @@ class _DashBoardState extends State<DashBoard> {
       case 1:
         {
           if (timer != null) timer!.cancel();
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ProfileTechnician()));
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => ProfileTechnician()));
           break;
         }
       case 2:
         {
           if (timer != null) timer!.cancel();
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ChangePassword()));
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => ChangePassword()));
           break;
         }
       case 3:
@@ -599,7 +600,7 @@ class _DashBoardState extends State<DashBoard> {
             dashBoardBottomSheet(context, true);
           } else {
             String technicianCode =
-            PreferenceUtils.getString(MyConstants.technicianCode);
+                PreferenceUtils.getString(MyConstants.technicianCode);
             if (await checkInternetConnection() == true) {
               showAlertDialog(context);
               ApiService apiService = ApiService(dio.Dio());
@@ -608,7 +609,7 @@ class _DashBoardState extends State<DashBoard> {
               if (response.forgotPasswordEntity!.responseCode == "200") {
                 Navigator.of(context, rootNavigator: true).pop();
                 SharedPreferences sharedPreferences =
-                await SharedPreferences.getInstance();
+                    await SharedPreferences.getInstance();
                 sharedPreferences.clear();
                 setToastMessage(
                     context, response.forgotPasswordEntity!.message!);
@@ -633,18 +634,62 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> getToken(BuildContext context) async {
     if (await checkInternetConnection() == true) {
-      ApiService apiService = ApiService(dio.Dio());
-      final response = await apiService
-          .getToken(PreferenceUtils.getString(MyConstants.technicianCode));
-      if (response.tokenEntity!.responseCode == "200") {
-        setState(() {
-          PreferenceUtils.setString(
-              MyConstants.token, response.tokenEntity!.data!);
-          PreferenceUtils.setString(MyConstants.videoPath, MyConstants.clear);
-          PreferenceUtils.setString(
-              MyConstants.technicianStatus, MyConstants.free);
-          getDashBoardDetails();
-        });
+      if (Platform.isAndroid) {
+
+        await permission.Permission.camera.request();
+
+        permission.PermissionStatus cameraStatus = await permission.Permission.camera.status;
+
+        if (cameraStatus.isDenied) {
+          Fluttertoast.showToast(
+              msg: "Please provide camera permission to continue",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Color(int.parse("0xfff" "507a7d")),
+              textColor: Colors.white,
+              fontSize: 16.0);
+          permission.openAppSettings();
+          getToken(context);
+        }
+
+        if (cameraStatus.isGranted) {
+
+          await permission.Permission.storage.request();
+
+          permission.PermissionStatus storageStatus =
+              await permission.Permission.storage.status;
+
+          if (storageStatus.isDenied) {
+            Fluttertoast.showToast(
+                msg: "Please provide storage permission to continue",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Color(int.parse("0xfff" "507a7d")),
+                textColor: Colors.white,
+                fontSize: 16.0);
+            permission.openAppSettings();
+            getToken(context);
+          }
+
+          if (storageStatus.isGranted) {
+            ApiService apiService = ApiService(dio.Dio());
+            final response = await apiService.getToken(
+                PreferenceUtils.getString(MyConstants.technicianCode));
+            if (response.tokenEntity!.responseCode == "200") {
+              setState(() {
+                PreferenceUtils.setString(
+                    MyConstants.token, response.tokenEntity!.data!);
+                PreferenceUtils.setString(
+                    MyConstants.videoPath, MyConstants.clear);
+                PreferenceUtils.setString(
+                    MyConstants.technicianStatus, MyConstants.free);
+                getDashBoardDetails();
+              });
+            }
+          }
+        }
       }
     } else {
       setToastMessage(context, MyConstants.internetConnection);

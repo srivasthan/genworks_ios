@@ -85,7 +85,7 @@ class _ServiceReportState extends State<ServiceReport> {
       };
 
       final Response<String> result = await Dio().request(
-          'https://genworks.kaspontech.com/djadmin_qa/servicereport_web_view/',
+          'https://genworks.kaspontech.com/djadmin/servicereport_web_view/',
           options: Options(
               method: 'POST',
               headers: {'Content-Type': 'application/json'},
@@ -164,7 +164,7 @@ class _ServiceReportState extends State<ServiceReport> {
           };
 
           final Response<String> result = await Dio().request(
-              'https://genworks.kaspontech.com/djadmin_qa/servicereport_web_view/',
+              'https://genworks.kaspontech.com/djadmin/servicereport_web_view/',
               options: Options(
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},
@@ -714,7 +714,7 @@ class _ServiceReportState extends State<ServiceReport> {
           };
 
           final Response<String> result = await Dio().request(
-              'https://genworks.kaspontech.com/djadmin_qa/servicereport_web_view/',
+              'https://genworks.kaspontech.com/djadmin/servicereport_web_view/',
               options: Options(
                   method: 'POST',
                   headers: {'Content-Type': 'application/json'},

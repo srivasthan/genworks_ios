@@ -13,6 +13,7 @@ class MyConstants {
   static const String cusMobile = "Mobile";
   static const String amcHints = "Amc Contracts";
   static const String mobileCapital = "Mobile No";
+  static const String enterAmount = "Enter Amount";
   static const String address = "Address";
   static const String appName = "FieldPro Service";
   static const String training = "Training";

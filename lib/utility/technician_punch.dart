@@ -5,6 +5,7 @@ import 'package:fieldpro_genworks_healthcare/utility/store_strings.dart';
 import 'package:fieldpro_genworks_healthcare/utility/validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as pl;
@@ -162,12 +163,27 @@ Future<Position> _getGeoLocationPosition(
             desiredAccuracy: LocationAccuracy.high);
       }
     }
-  } else if (Platform.isAndroid) {
+  }
+  else if (Platform.isAndroid) {
     // Test if location services are enabled.
+    bool serviceEnabled;
     var permissionGranted = await location.hasPermission();
 
     if (permissionGranted == pl.PermissionStatus.denied) {
       permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.deniedForever) {
+        Fluttertoast.showToast(
+            msg: "Please provide location permission to continue",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Color(int.parse("0xfff" "507a7d")),
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+        openAppSettings();
+        technicianPunchIn(context, myState);
+      }
       if (permission == LocationPermission.denied) {
         // Permissions are denied, next time you could try
         // requesting permissions again (this is also where
@@ -180,8 +196,15 @@ Future<Position> _getGeoLocationPosition(
         technicianPunchIn(context, myState);
       }
     } else if (permissionGranted == pl.PermissionStatus.granted) {
-      locationStatus = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      serviceEnabled = await location.serviceEnabled();
+
+      if(!serviceEnabled){
+        serviceEnabled = await location.requestService();
+        technicianPunchIn(context, myState);
+      } else {
+        locationStatus = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+      }
     }
   }
 
